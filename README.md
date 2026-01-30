@@ -2,6 +2,9 @@
 
 Portfolio website voor CreaCas - Fotografie, Design & AI Content Creator.
 
+**Live:** https://creacas.netlify.app
+**Repository:** https://github.com/creacas/creacas-website
+
 ## Tech Stack
 
 - **HTML5** - Semantic markup
@@ -117,21 +120,24 @@ const galleryData = {
 
 ## Deployment
 
-### Netlify (aanbevolen)
+De site is gekoppeld aan GitHub en Netlify voor automatische deployment.
 
-1. Push code naar GitHub/GitLab
-2. Verbind repository met Netlify
-3. Deploy settings:
-   - Build command: (leeg laten)
-   - Publish directory: `.`
-4. Koppel custom domein (creacas.nl)
+### Workflow
 
-### Handmatig
+1. Wijzig code lokaal
+2. Commit en push naar GitHub:
+   ```bash
+   git add -A
+   git commit -m "Beschrijving van wijziging"
+   git push
+   ```
+3. Netlify deployt automatisch (binnen ~1 minuut)
 
-1. Ga naar [netlify.com](https://netlify.com)
-2. Drag & drop de `2026` map
-3. Site is live op random Netlify URL
-4. Koppel custom domein in Site settings > Domain management
+### Custom domein koppelen
+
+1. Ga naar [Netlify Dashboard](https://app.netlify.com) → Site settings → Domain management
+2. Klik "Add custom domain" → voer `creacas.nl` in
+3. Bij Antagonist: pas DNS aan naar Netlify's nameservers (of voeg CNAME record toe)
 
 ## Lokaal testen
 

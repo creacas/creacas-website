@@ -21,7 +21,7 @@ Portfolio website voor CreaCas - Fotografie, Design & AI Content Creator.
 - Dark mode (toggle + system preference detection)
 - Responsive design (mobile-first)
 - Netlify Image CDN voor automatische optimalisatie
-- Contact formulier (frontend-only)
+- Contact formulier via Netlify Forms
 
 ## Projectstructuur
 
@@ -125,13 +125,16 @@ De site is gekoppeld aan GitHub en Netlify voor automatische deployment.
 ### Workflow
 
 1. Wijzig code lokaal
-2. Commit en push naar GitHub:
+2. Test in browser (open `index.html`)
+3. Commit en push naar GitHub:
    ```bash
    git add -A
    git commit -m "Beschrijving van wijziging"
    git push
    ```
-3. Netlify deployt automatisch (binnen ~1 minuut)
+4. Netlify deployt automatisch (binnen ~1 minuut)
+
+**Let op:** Netlify free tier heeft 300 build minutes/maand. Elke push kost ~10-30 seconden. Test daarom altijd lokaal voordat je pusht.
 
 ### Custom domein koppelen
 
@@ -184,19 +187,13 @@ Bewerk in `index.html`:
 
 ## Contact formulier
 
-Het formulier is frontend-only. Voor echte verzending:
+Het formulier gebruikt Netlify Forms. Berichten zijn zichtbaar in het Netlify dashboard onder **Forms**.
 
-### Optie 1: Netlify Forms
-Voeg toe aan het `<form>` element:
-```html
-<form class="contact-form" name="contact" method="POST" data-netlify="true">
-```
+### E-mailnotificaties instellen
 
-### Optie 2: Formspree
-Vervang form action:
-```html
-<form class="contact-form" action="https://formspree.io/f/xxxxx" method="POST">
-```
+1. Ga naar [Netlify Dashboard](https://app.netlify.com) → Forms
+2. Klik op "contact" formulier → Settings → Form notifications
+3. Add notification → Email notification → `info@creacas.nl`
 
 ## Browser Support
 
@@ -212,6 +209,12 @@ Netlify Image CDN zorgt voor:
 - Responsive sizing
 - Lazy loading
 - Caching (1 jaar)
+
+## TODO
+
+- [ ] SEO optimalisatie (Open Graph, structured data, sitemap.xml, robots.txt)
+- [ ] Google Analytics 4 + Search Console
+- [ ] Custom domein koppelen (creacas.nl)
 
 ## Licentie
 

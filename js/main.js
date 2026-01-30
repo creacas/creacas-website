@@ -428,12 +428,26 @@ function initContactForm() {
     btn.innerHTML = 'Verzenden...';
     btn.disabled = true;
 
-    setTimeout(() => {
-      showNotification('Bericht verzonden! Ik neem snel contact op.', 'success');
-      form.reset();
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(formData).toString()
+    })
+    .then(response => {
+      if (response.ok) {
+        showNotification('Bericht verzonden! Ik neem snel contact op.', 'success');
+        form.reset();
+      } else {
+        showNotification('Er ging iets mis. Probeer het opnieuw.', 'error');
+      }
+    })
+    .catch(() => {
+      showNotification('Er ging iets mis. Probeer het opnieuw.', 'error');
+    })
+    .finally(() => {
       btn.innerHTML = originalText;
       btn.disabled = false;
-    }, 1500);
+    });
   });
 }
 

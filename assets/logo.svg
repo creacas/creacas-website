@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="currentColor">
+  <!-- Left C -->
+  <path d="M50 10
+           A40 40 0 1 0 50 90
+           A40 40 0 0 1 50 74
+           A24 24 0 1 1 50 26
+           A40 40 0 0 1 50 10
+           Z"/>
+  <!-- Right C (mirrored) -->
+  <path d="M150 10
+           A40 40 0 1 1 150 90
+           A40 40 0 0 0 150 74
+           A24 24 0 1 0 150 26
+           A40 40 0 0 0 150 10
+           Z"/>
+  <!-- Center overlap creates the eye/vesica shape naturally -->
+</svg>

@@ -1,16 +1,10 @@
 FROM node:20-alpine
 
-# Sharp needs these for ARM64
-RUN apk add --no-cache vips-dev build-base python3
-
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies (Sharp downloads its own prebuilt libvips for ARM64)
 COPY package.json ./
 RUN npm install --omit=dev && npm cache clean --force
-
-# Remove build dependencies to reduce image size
-RUN apk del build-base python3
 
 # Copy application files
 COPY . .

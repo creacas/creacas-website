@@ -6,8 +6,8 @@ RUN apk add --no-cache vips-dev build-base python3
 WORKDIR /app
 
 # Install dependencies
-COPY package.json package-lock.json* ./
-RUN npm ci --only=production && npm cache clean --force
+COPY package.json ./
+RUN npm install --omit=dev && npm cache clean --force
 
 # Remove build dependencies to reduce image size
 RUN apk del build-base python3

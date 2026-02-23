@@ -9,6 +9,9 @@ const { seedIfEmpty } = require('./src/utils/seed');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust reverse proxy (Caddy) for secure cookies and correct client IP
+app.set('trust proxy', 1);
+
 // Ensure data and uploads directories exist
 const fs = require('fs');
 fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });

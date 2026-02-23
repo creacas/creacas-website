@@ -3,17 +3,9 @@
 // ============================================
 
 // Gallery Data - each portfolio item links to a collection
-// Helper function for Netlify Image CDN (with local fallback)
-const isLocalhost = window.location.hostname === 'localhost' ||
-                    window.location.hostname === '127.0.0.1' ||
-                    window.location.protocol === 'file:';
-
-function netlifyImage(path, width = 1200) {
-  if (isLocalhost) {
-    // Local development: use original path
-    return path.startsWith('/') ? path.substring(1) : path;
-  }
-  return `/.netlify/images?url=${path}&w=${width}&q=80`;
+// Image path helper
+function imagePath(path) {
+  return path.startsWith('/') ? path.substring(1) : path;
 }
 
 const galleryData = {
@@ -325,7 +317,7 @@ function initGallery() {
       // Populate gallery grid (thumbnails at 400px)
       galleryGrid.innerHTML = gallery.images.map((img, index) => `
         <div class="gallery-item" data-index="${index}">
-          <img src="${netlifyImage(img.src, 400)}" alt="${img.alt}" loading="lazy">
+          <img src="${imagePath(img.src)}" alt="${img.alt}" loading="lazy">
         </div>
       `).join('');
 
@@ -361,7 +353,7 @@ function initGallery() {
 
   function updateImageViewer() {
     const image = currentGallery[currentImageIndex];
-    viewerImage.src = netlifyImage(image.src, 1400);
+    viewerImage.src = imagePath(image.src);
     viewerImage.alt = image.alt;
     currentIndexEl.textContent = currentImageIndex + 1;
     totalImagesEl.textContent = currentGallery.length;
@@ -428,13 +420,14 @@ function initContactForm() {
     btn.innerHTML = 'Verzenden...';
     btn.disabled = true;
 
-    fetch('/', {
+    fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(formData).toString()
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     })
-    .then(response => {
-      if (response.ok) {
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
         showNotification('Bericht verzonden! Ik neem snel contact op.', 'success');
         form.reset();
       } else {

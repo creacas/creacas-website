@@ -11,7 +11,7 @@ const supportsWebP = (function() {
   return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
 })();
 
-// Image path helper — serves WebP when supported
+// Image path helper - serves WebP when supported
 function imagePath(path) {
   path = path.startsWith('/') ? path.substring(1) : path;
   if (supportsWebP) {

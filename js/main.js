@@ -3,9 +3,21 @@
 // ============================================
 
 // Gallery Data - each portfolio item links to a collection
-// Image path helper
+// WebP support detection
+const supportsWebP = (function() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+})();
+
+// Image path helper — serves WebP when supported
 function imagePath(path) {
-  return path.startsWith('/') ? path.substring(1) : path;
+  path = path.startsWith('/') ? path.substring(1) : path;
+  if (supportsWebP) {
+    return path.replace(/\.(jpe?g|png)$/i, '.webp');
+  }
+  return path;
 }
 
 const galleryData = {

@@ -1,0 +1,149 @@
+<% const active = 'contact' %>
+<%- include('layout-header') %>
+
+<div class="page-header">
+  <h1>Contact</h1>
+  <p>Beheer contactgegevens, social links en het contactformulier.</p>
+</div>
+
+<!-- Contact Info -->
+<div class="card">
+  <div class="card-header">
+    <h2>Contactgegevens</h2>
+  </div>
+  <div class="card-body">
+    <form id="contactForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>E-mailadres</label>
+          <input type="email" name="contact_email" value="<%= settings.contact_email || '' %>" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Locatie</label>
+          <input type="text" name="contact_location" value="<%= settings.contact_location || '' %>" class="form-control">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Contact heading</label>
+          <input type="text" name="contact_heading" value="<%= settings.contact_heading || '' %>" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Contact subtitel</label>
+          <input type="text" name="contact_subtitle" value="<%= settings.contact_subtitle || '' %>" class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Web3Forms API Key</label>
+        <input type="text" name="web3forms_key" value="<%= settings.web3forms_key || '' %>" class="form-control" placeholder="Plak hier je Web3Forms access key">
+        <small class="form-help">Nodig voor het contactformulier. Maak een gratis key aan op web3forms.com</small>
+      </div>
+      <button type="submit" class="btn btn-primary">Opslaan</button>
+    </form>
+  </div>
+</div>
+
+<!-- Social Links -->
+<div class="card">
+  <div class="card-header">
+    <h2>Social Links</h2>
+    <button class="btn btn-primary btn-sm" onclick="showSocialForm()">+ Link toevoegen</button>
+  </div>
+  <div class="card-body">
+    <div id="socialForm" style="display:none" class="inline-form-vertical">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Platform</label>
+          <input type="text" id="socialPlatform" placeholder="bijv. Instagram" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>URL</label>
+          <input type="url" id="socialUrl" placeholder="https://..." class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Icon SVG (plak de volledige &lt;svg&gt; tag)</label>
+        <textarea id="socialIcon" class="form-control" rows="3"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary btn-sm" onclick="saveSocial()">Opslaan</button>
+        <button class="btn btn-secondary btn-sm" onclick="hideSocialForm()">Annuleren</button>
+      </div>
+    </div>
+
+    <div id="socialList" class="sortable-list">
+      <% socialLinks.forEach(link => { %>
+      <div class="sortable-item" data-id="<%= link.id %>">
+        <div class="drag-handle">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 6h2v2H8V6zm6 0h2v2h-2V6zM8 11h2v2H8v-2zm6 0h2v2h-2v-2zm-6 5h2v2H8v-2zm6 0h2v2h-2v-2z"/></svg>
+        </div>
+        <div class="item-icon"><%- link.icon_svg %></div>
+        <div class="item-info">
+          <strong><%= link.platform %></strong>
+          <span class="text-muted"><%= link.url %></span>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="editSocial(<%= link.id %>)">Bewerken</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSocial(<%= link.id %>)">Verwijderen</button>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<script>
+const socialData = <%- JSON.stringify(socialLinks) %>;
+let editingSocialId = null;
+
+document.getElementById('contactForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const data = Object.fromEntries(form);
+  const res = await fetch('/backend/api/settings', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (res.ok) showToast('Contact instellingen opgeslagen!');
+  else showToast('Opslaan mislukt', 'error');
+});
+
+function showSocialForm() {
+  editingSocialId = null;
+  document.getElementById('socialPlatform').value = '';
+  document.getElementById('socialUrl').value = '';
+  document.getElementById('socialIcon').value = '';
+  document.getElementById('socialForm').style.display = 'block';
+}
+function hideSocialForm() { document.getElementById('socialForm').style.display = 'none'; }
+
+function editSocial(id) {
+  const link = socialData.find(s => s.id === id);
+  if (!link) return;
+  editingSocialId = id;
+  document.getElementById('socialPlatform').value = link.platform;
+  document.getElementById('socialUrl').value = link.url;
+  document.getElementById('socialIcon').value = link.icon_svg;
+  document.getElementById('socialForm').style.display = 'block';
+}
+
+async function saveSocial() {
+  const data = {
+    platform: document.getElementById('socialPlatform').value,
+    url: document.getElementById('socialUrl').value,
+    icon_svg: document.getElementById('socialIcon').value
+  };
+  const url = editingSocialId ? `/backend/api/social/${editingSocialId}` : '/backend/api/social';
+  const method = editingSocialId ? 'PUT' : 'POST';
+  const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+  if (res.ok) { showToast('Social link opgeslagen!'); location.reload(); }
+  else showToast('Opslaan mislukt', 'error');
+}
+
+async function deleteSocial(id) {
+  if (!confirm('Verwijder deze social link?')) return;
+  const res = await fetch(`/backend/api/social/${id}`, { method: 'DELETE' });
+  if (res.ok) { showToast('Link verwijderd'); location.reload(); }
+}
+</script>
+
+<%- include('layout-footer') %>

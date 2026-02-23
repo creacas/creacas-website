@@ -1,0 +1,131 @@
+<% const active = 'portfolio' %>
+<%- include('layout-header') %>
+
+<div class="page-header">
+  <h1>Portfolio</h1>
+  <p>Beheer je portfolio categorieën en projecten.</p>
+</div>
+
+<!-- Categories -->
+<div class="card">
+  <div class="card-header">
+    <h2>Categorieën</h2>
+    <button class="btn btn-primary btn-sm" onclick="showCategoryForm()">+ Categorie toevoegen</button>
+  </div>
+  <div class="card-body">
+    <div id="categoryForm" style="display:none" class="inline-form">
+      <input type="text" id="catName" placeholder="Naam" class="form-control form-control-sm">
+      <input type="text" id="catSlug" placeholder="Slug (bijv. fotografie)" class="form-control form-control-sm">
+      <input type="text" id="catFilter" placeholder="Filter label" class="form-control form-control-sm">
+      <button class="btn btn-primary btn-sm" onclick="saveCategory()">Opslaan</button>
+      <button class="btn btn-secondary btn-sm" onclick="hideCategoryForm()">Annuleren</button>
+    </div>
+    <div id="categoriesList" class="sortable-list">
+      <% categories.forEach(cat => { %>
+      <div class="sortable-item" data-id="<%= cat.id %>">
+        <div class="drag-handle">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 6h2v2H8V6zm6 0h2v2h-2V6zM8 11h2v2H8v-2zm6 0h2v2h-2v-2zm-6 5h2v2H8v-2zm6 0h2v2h-2v-2z"/></svg>
+        </div>
+        <div class="item-info">
+          <strong><%= cat.name %></strong>
+          <span class="text-muted">(<%= cat.slug %>) — Filter: <%= cat.filter_label %></span>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteCategory(<%= cat.id %>)">Verwijderen</button>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<!-- Projects -->
+<div class="card">
+  <div class="card-header">
+    <h2>Projecten</h2>
+    <button class="btn btn-primary btn-sm" onclick="showProjectForm()">+ Project toevoegen</button>
+  </div>
+  <div class="card-body">
+    <div id="projectForm" style="display:none" class="inline-form">
+      <input type="text" id="projTitle" placeholder="Titel" class="form-control form-control-sm">
+      <input type="text" id="projSlug" placeholder="Slug" class="form-control form-control-sm">
+      <input type="text" id="projDesc" placeholder="Korte beschrijving" class="form-control form-control-sm">
+      <select id="projCategory" class="form-control form-control-sm">
+        <% categories.forEach(cat => { %>
+        <option value="<%= cat.id %>"><%= cat.name %></option>
+        <% }) %>
+      </select>
+      <input type="file" id="projCover" accept="image/*" class="form-control form-control-sm">
+      <button class="btn btn-primary btn-sm" onclick="saveProject()">Opslaan</button>
+      <button class="btn btn-secondary btn-sm" onclick="hideProjectForm()">Annuleren</button>
+    </div>
+    <div id="projectsList" class="sortable-list">
+      <% projects.forEach(project => { %>
+      <div class="sortable-item" data-id="<%= project.id %>">
+        <div class="drag-handle">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 6h2v2H8V6zm6 0h2v2h-2V6zM8 11h2v2H8v-2zm6 0h2v2h-2v-2zm-6 5h2v2H8v-2zm6 0h2v2h-2v-2z"/></svg>
+        </div>
+        <img src="<%= project.cover_image %>" alt="<%= project.title %>" class="item-thumb">
+        <div class="item-info">
+          <strong><%= project.title %></strong>
+          <span class="text-muted"><%= project.category_name %> — <%= project.description %></span>
+        </div>
+        <a href="/backend/portfolio/<%= project.id %>" class="btn btn-secondary btn-sm">Bewerken</a>
+        <button class="btn btn-danger btn-sm" onclick="deleteProject(<%= project.id %>)">Verwijderen</button>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<script>
+function showCategoryForm() { document.getElementById('categoryForm').style.display = 'flex'; }
+function hideCategoryForm() { document.getElementById('categoryForm').style.display = 'none'; }
+function showProjectForm() { document.getElementById('projectForm').style.display = 'flex'; }
+function hideProjectForm() { document.getElementById('projectForm').style.display = 'none'; }
+
+async function saveCategory() {
+  const data = {
+    name: document.getElementById('catName').value,
+    slug: document.getElementById('catSlug').value,
+    filter_label: document.getElementById('catFilter').value
+  };
+  const res = await fetch('/backend/api/portfolio/categories', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (res.ok) { showToast('Categorie aangemaakt!'); location.reload(); }
+  else showToast('Aanmaken mislukt', 'error');
+}
+
+async function deleteCategory(id) {
+  if (!confirm('Verwijder deze categorie? Alle gekoppelde projecten worden ook verwijderd!')) return;
+  const res = await fetch(`/backend/api/portfolio/categories/${id}`, { method: 'DELETE' });
+  if (res.ok) { showToast('Categorie verwijderd'); location.reload(); }
+}
+
+async function saveProject() {
+  const form = new FormData();
+  form.append('title', document.getElementById('projTitle').value);
+  form.append('slug', document.getElementById('projSlug').value);
+  form.append('description', document.getElementById('projDesc').value);
+  form.append('category_id', document.getElementById('projCategory').value);
+  const file = document.getElementById('projCover').files[0];
+  if (file) form.append('cover_image', file);
+  const res = await fetch('/backend/api/portfolio/projects', { method: 'POST', body: form });
+  if (res.ok) { showToast('Project aangemaakt!'); location.reload(); }
+  else showToast('Aanmaken mislukt', 'error');
+}
+
+async function deleteProject(id) {
+  if (!confirm('Verwijder dit project en alle galerij-afbeeldingen?')) return;
+  const res = await fetch(`/backend/api/portfolio/projects/${id}`, { method: 'DELETE' });
+  if (res.ok) { showToast('Project verwijderd'); location.reload(); }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSortable('categoriesList', '/backend/api/portfolio/categories/reorder');
+  initSortable('projectsList', '/backend/api/portfolio/projects/reorder');
+});
+</script>
+
+<%- include('layout-footer') %>

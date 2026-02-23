@@ -1,0 +1,334 @@
+const express = require('express');
+const router = express.Router();
+const { requireAuth } = require('../middleware/auth');
+const { upload, setUploadType } = require('../middleware/upload');
+const { processImage, deleteImage } = require('../utils/image-processor');
+const settingsModel = require('../models/settings');
+const heroModel = require('../models/hero');
+const portfolioModel = require('../models/portfolio');
+const servicesModel = require('../models/services');
+const aboutModel = require('../models/about');
+const contactModel = require('../models/contact');
+
+router.use(requireAuth);
+
+// === SETTINGS ===
+router.put('/settings', (req, res) => {
+  try {
+    settingsModel.updateMultiple(req.body);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// === HERO ===
+router.put('/hero/content', (req, res) => {
+  try {
+    heroModel.updateContent(req.body);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/hero/slides', setUploadType('hero'), upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Geen afbeelding geüpload.' });
+    const { processed, thumbnail } = await processImage(req.file.path, 'hero');
+    const result = heroModel.addSlide(processed, req.body.alt_text || '');
+    res.json({ success: true, id: result.lastInsertRowid, image_path: processed });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reorder BEFORE :id to prevent route conflict
+router.put('/hero/slides/reorder', (req, res) => {
+  try {
+    heroModel.reorderSlides(req.body.ids);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/hero/slides/:id', (req, res) => {
+  try {
+    heroModel.updateSlide(parseInt(req.params.id), req.body);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/hero/slides/:id', (req, res) => {
+  try {
+    const slides = heroModel.getSlides();
+    const slide = slides.find(s => s.id === parseInt(req.params.id));
+    if (slide) deleteImage(slide.image_path);
+    heroModel.deleteSlide(parseInt(req.params.id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// === PORTFOLIO CATEGORIES ===
+router.post('/portfolio/categories', (req, res) => {
+  try {
+    const result = portfolioModel.createCategory(req.body);
+    res.json({ success: true, id: result.lastInsertRowid });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reorder BEFORE :id
+router.put('/portfolio/categories/reorder', (req, res) => {
+  try {
+    portfolioModel.reorderCategories(req.body.ids);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/portfolio/categories/:id', (req, res) => {
+  try {
+    portfolioModel.updateCategory(parseInt(req.params.id), req.body);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/portfolio/categories/:id', (req, res) => {
+  try {
+    portfolioModel.deleteCategory(parseInt(req.params.id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// === PORTFOLIO PROJECTS ===
+router.post('/portfolio/projects', setUploadType('portfolio'), upload.single('cover_image'), async (req, res) => {
+  try {
+    let coverImage = '';
+    if (req.file) {
+      const { processed } = await processImage(req.file.path, 'portfolio');
+      coverImage = processed;
+    }
+    const result = portfolioModel.createProject({
+      category_id: parseInt(req.body.category_id),
+      title: req.body.title,
+      slug: req.body.slug,
+      description: req.body.description || '',
+      cover_image: coverImage
+    });
+    res.json({ success: true, id: result.lastInsertRowid });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reorder BEFORE :id
+router.put('/portfolio/projects/reorder', (req, res) => {
+  try {
+    portfolioModel.reorderProjects(req.body.ids);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/portfolio/projects/:id', setUploadType('portfolio'), upload.single('cover_image'), async (req, res) => {
+  try {
+    const data = {
+      category_id: req.body.category_id ? parseInt(req.body.category_id) : undefined,
+      title: req.body.title,
+      slug: req.body.slug,
+      description: req.body.description
+    };
+    if (req.file) {
+      const old = portfolioModel.getProjectById(parseInt(req.params.id));
+      if (old) deleteImage(old.cover_image);
+      const { processed } = await processImage(req.file.path, 'portfolio');
+      data.cover_image = processed;
+    }
+    portfolioModel.updateProject(parseInt(req.params.id), data);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/portfolio/projects/:id', (req, res) => {
+  try {
+    const project = portfolioModel.getProjectById(parseInt(req.params.id));
+    if (project) {
+      deleteImage(project.cover_image);
+      const images = portfolioModel.getGalleryImages(project.id);
+      for (const img of images) {
+        deleteImage(img.image_path);
+      }
+    }
+    portfolioModel.deleteProject(parseInt(req.params.id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// === GALLERY IMAGES ===
+router.post('/portfolio/projects/:id/gallery', setUploadType('gallery'), upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Geen afbeelding geüpload.' });
+    const { processed, thumbnail } = await processImage(req.file.path, 'gallery');
+    const result = portfolioModel.addGalleryImage({
+      project_id: parseInt(req.params.id),
+      image_path: processed,
+      thumbnail_path: thumbnail,
+      alt_text: req.body.alt_text || ''
+    });
+    res.json({ success: true, id: result.lastInsertRowid, image_path: processed, thumbnail_path: thumbnail });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reorder BEFORE :id
+router.put('/portfolio/gallery/reorder', (req, res) => {
+  try {
+    portfolioModel.reorderGalleryImages(req.body.ids);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/portfolio/gallery/:id', (req, res) => {
+  try {
+    portfolioModel.updateGalleryImage(parseInt(req.params.id), req.body);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/portfolio/gallery/:id', (req, res) => {
+  try {
+    const img = portfolioModel.getGalleryImageById(parseInt(req.params.id));
+    if (img) deleteImage(img.image_path);
+    portfolioModel.deleteGalleryImage(parseInt(req.params.id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// === SERVICES ===
+router.post('/services', (req, res) => {
+  try {
+    const result = servicesModel.create(req.body);
+    res.json({ success: true, id: result.lastInsertRowid });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reorder BEFORE :id
+router.put('/services/reorder', (req, res) => {
+  try {
+    servicesModel.reorder(req.body.ids);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/services/:id', (req, res) => {
+  try {
+    servicesModel.update(parseInt(req.params.id), req.body);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/services/:id', (req, res) => {
+  try {
+    servicesModel.remove(parseInt(req.params.id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// === ABOUT ===
+router.put('/about', (req, res) => {
+  try {
+    const current = aboutModel.getContent();
+    aboutModel.updateContent({
+      heading: req.body.heading || current.heading,
+      content: req.body.content || current.content,
+      image_path: current.image_path
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/about/image', setUploadType('about'), upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Geen afbeelding geüpload.' });
+    const current = aboutModel.getContent();
+    if (current) deleteImage(current.image_path);
+    const { processed } = await processImage(req.file.path, 'about');
+    aboutModel.updateImage(processed);
+    res.json({ success: true, image_path: processed });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/about/stats', (req, res) => {
+  try {
+    aboutModel.updateStats(req.body.stats);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// === SOCIAL LINKS ===
+router.post('/social', (req, res) => {
+  try {
+    const result = contactModel.createSocialLink(req.body);
+    res.json({ success: true, id: result.lastInsertRowid });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/social/:id', (req, res) => {
+  try {
+    contactModel.updateSocialLink(parseInt(req.params.id), req.body);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/social/:id', (req, res) => {
+  try {
+    contactModel.deleteSocialLink(parseInt(req.params.id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+module.exports = router;

@@ -1,0 +1,110 @@
+<% const active = 'services' %>
+<%- include('layout-header') %>
+
+<div class="page-header">
+  <h1>Services</h1>
+  <p>Beheer de service cards op de homepage.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2>Services</h2>
+    <button class="btn btn-primary btn-sm" onclick="showServiceForm()">+ Service toevoegen</button>
+  </div>
+  <div class="card-body">
+    <div id="serviceForm" style="display:none" class="inline-form-vertical">
+      <div class="form-group">
+        <label>Titel</label>
+        <input type="text" id="svcTitle" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Beschrijving</label>
+        <textarea id="svcDesc" class="form-control" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Icon SVG (plak de volledige &lt;svg&gt; tag)</label>
+        <textarea id="svcIcon" class="form-control" rows="3"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary btn-sm" onclick="saveService()">Opslaan</button>
+        <button class="btn btn-secondary btn-sm" onclick="hideServiceForm()">Annuleren</button>
+      </div>
+    </div>
+
+    <div id="servicesList" class="sortable-list">
+      <% services.forEach(service => { %>
+      <div class="sortable-item" data-id="<%= service.id %>">
+        <div class="drag-handle">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 6h2v2H8V6zm6 0h2v2h-2V6zM8 11h2v2H8v-2zm6 0h2v2h-2v-2zm-6 5h2v2H8v-2zm6 0h2v2h-2v-2z"/></svg>
+        </div>
+        <div class="item-icon"><%- service.icon_svg %></div>
+        <div class="item-info">
+          <strong><%= service.title %></strong>
+          <span class="text-muted"><%= service.description.substring(0, 80) %>...</span>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="editService(<%= service.id %>, this)">Bewerken</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteService(<%= service.id %>)">Verwijderen</button>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<script>
+const servicesData = <%- JSON.stringify(services) %>;
+let editingServiceId = null;
+
+function showServiceForm() {
+  editingServiceId = null;
+  document.getElementById('svcTitle').value = '';
+  document.getElementById('svcDesc').value = '';
+  document.getElementById('svcIcon').value = '';
+  document.getElementById('serviceForm').style.display = 'block';
+}
+
+function hideServiceForm() {
+  document.getElementById('serviceForm').style.display = 'none';
+  editingServiceId = null;
+}
+
+function editService(id) {
+  const svc = servicesData.find(s => s.id === id);
+  if (!svc) return;
+  editingServiceId = id;
+  document.getElementById('svcTitle').value = svc.title;
+  document.getElementById('svcDesc').value = svc.description;
+  document.getElementById('svcIcon').value = svc.icon_svg;
+  document.getElementById('serviceForm').style.display = 'block';
+}
+
+async function saveService() {
+  const data = {
+    title: document.getElementById('svcTitle').value,
+    description: document.getElementById('svcDesc').value,
+    icon_svg: document.getElementById('svcIcon').value
+  };
+  const url = editingServiceId
+    ? `/backend/api/services/${editingServiceId}`
+    : '/backend/api/services';
+  const method = editingServiceId ? 'PUT' : 'POST';
+  const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (res.ok) { showToast('Service opgeslagen!'); location.reload(); }
+  else showToast('Opslaan mislukt', 'error');
+}
+
+async function deleteService(id) {
+  if (!confirm('Verwijder deze service?')) return;
+  const res = await fetch(`/backend/api/services/${id}`, { method: 'DELETE' });
+  if (res.ok) { showToast('Service verwijderd'); location.reload(); }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSortable('servicesList', '/backend/api/services/reorder');
+});
+</script>
+
+<%- include('layout-footer') %>

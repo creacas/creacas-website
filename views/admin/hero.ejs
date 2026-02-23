@@ -1,0 +1,120 @@
+<% const active = 'hero' %>
+<%- include('layout-header') %>
+
+<div class="page-header">
+  <h1>Hero Sectie</h1>
+  <p>Beheer de hero slider en tekst op de homepage.</p>
+</div>
+
+<!-- Hero Text -->
+<div class="card">
+  <div class="card-header">
+    <h2>Hero Tekst</h2>
+  </div>
+  <div class="card-body">
+    <form id="heroContentForm">
+      <div class="form-group">
+        <label>Heading (HTML toegestaan, gebruik &lt;span&gt; voor oranje tekst)</label>
+        <input type="text" name="heading" value="<%- hero ? hero.heading.replace(/"/g, '&quot;') : '' %>" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Tagline</label>
+        <textarea name="tagline" class="form-control" rows="2"><%= hero ? hero.tagline : '' %></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Primaire knop tekst</label>
+          <input type="text" name="button_primary_text" value="<%= hero ? hero.button_primary_text : '' %>" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Primaire knop link</label>
+          <input type="text" name="button_primary_link" value="<%= hero ? hero.button_primary_link : '' %>" class="form-control">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Secundaire knop tekst</label>
+          <input type="text" name="button_secondary_text" value="<%= hero ? hero.button_secondary_text : '' %>" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Secundaire knop link</label>
+          <input type="text" name="button_secondary_link" value="<%= hero ? hero.button_secondary_link : '' %>" class="form-control">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Opslaan</button>
+    </form>
+  </div>
+</div>
+
+<!-- Hero Slides -->
+<div class="card">
+  <div class="card-header">
+    <h2>Slider Afbeeldingen</h2>
+    <button class="btn btn-primary btn-sm" onclick="document.getElementById('slideUpload').click()">
+      + Afbeelding toevoegen
+    </button>
+    <input type="file" id="slideUpload" accept="image/*" style="display:none" onchange="uploadHeroSlide(this)">
+  </div>
+  <div class="card-body">
+    <div id="slidesList" class="sortable-list">
+      <% slides.forEach(slide => { %>
+      <div class="sortable-item" data-id="<%= slide.id %>">
+        <div class="drag-handle">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M8 6h2v2H8V6zm6 0h2v2h-2V6zM8 11h2v2H8v-2zm6 0h2v2h-2v-2zm-6 5h2v2H8v-2zm6 0h2v2h-2v-2z"/></svg>
+        </div>
+        <img src="<%= slide.image_path %>" alt="<%= slide.alt_text %>" class="item-thumb">
+        <div class="item-info">
+          <input type="text" value="<%= slide.alt_text %>" placeholder="Alt tekst" class="form-control form-control-sm" onchange="updateSlideAlt(<%= slide.id %>, this.value)">
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteSlide(<%= slide.id %>)">Verwijderen</button>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('heroContentForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const data = Object.fromEntries(form);
+  const res = await fetch('/backend/api/hero/content', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (res.ok) showToast('Hero tekst opgeslagen!');
+  else showToast('Opslaan mislukt', 'error');
+});
+
+async function uploadHeroSlide(input) {
+  if (!input.files[0]) return;
+  const form = new FormData();
+  form.append('image', input.files[0]);
+  form.append('alt_text', input.files[0].name.replace(/\.[^.]+$/, ''));
+  const res = await fetch('/backend/api/hero/slides', { method: 'POST', body: form });
+  if (res.ok) { showToast('Slide toegevoegd!'); location.reload(); }
+  else showToast('Upload mislukt', 'error');
+  input.value = '';
+}
+
+async function updateSlideAlt(id, value) {
+  await fetch(`/backend/api/hero/slides/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ alt_text: value })
+  });
+}
+
+async function deleteSlide(id) {
+  if (!confirm('Weet je zeker dat je deze slide wilt verwijderen?')) return;
+  const res = await fetch(`/backend/api/hero/slides/${id}`, { method: 'DELETE' });
+  if (res.ok) { showToast('Slide verwijderd'); location.reload(); }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSortable('slidesList', '/backend/api/hero/slides/reorder');
+});
+</script>
+
+<%- include('layout-footer') %>

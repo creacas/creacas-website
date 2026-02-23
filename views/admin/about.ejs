@@ -1,0 +1,141 @@
+<% const active = 'about' %>
+<%- include('layout-header') %>
+
+<div class="page-header">
+  <h1>Over Mij</h1>
+  <p>Bewerk de 'Over Mij' sectie, afbeelding en statistieken.</p>
+</div>
+
+<!-- About Text -->
+<div class="card">
+  <div class="card-header">
+    <h2>Tekst</h2>
+  </div>
+  <div class="card-body">
+    <form id="aboutForm">
+      <div class="form-group">
+        <label>Heading</label>
+        <input type="text" name="heading" value="<%= about ? about.heading : '' %>" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Content</label>
+        <div id="aboutEditor" class="quill-editor"><%- about ? about.content : '' %></div>
+        <input type="hidden" name="content" id="aboutContent">
+      </div>
+      <button type="submit" class="btn btn-primary">Opslaan</button>
+    </form>
+  </div>
+</div>
+
+<!-- About Image -->
+<div class="card">
+  <div class="card-header">
+    <h2>Afbeelding</h2>
+  </div>
+  <div class="card-body">
+    <div class="image-upload-area">
+      <img src="<%= about ? about.image_path : '' %>" alt="Over Mij" class="preview-image" id="aboutImagePreview">
+      <input type="file" id="aboutImageUpload" accept="image/*" class="form-control" onchange="uploadAboutImage(this)">
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="card">
+  <div class="card-header">
+    <h2>Statistieken</h2>
+    <button class="btn btn-primary btn-sm" onclick="addStat()">+ Statistiek toevoegen</button>
+  </div>
+  <div class="card-body">
+    <div id="statsList">
+      <% stats.forEach((stat, i) => { %>
+      <div class="stat-row" data-index="<%= i %>">
+        <input type="text" value="<%= stat.number %>" placeholder="Nummer (bijv. 20+)" class="form-control form-control-sm stat-number">
+        <input type="text" value="<%= stat.label %>" placeholder="Label (bijv. Jaar Ervaring)" class="form-control form-control-sm stat-label">
+        <button class="btn btn-danger btn-sm" onclick="removeStat(this)">X</button>
+      </div>
+      <% }) %>
+    </div>
+    <button class="btn btn-primary" style="margin-top: 1rem;" onclick="saveStats()">Statistieken opslaan</button>
+  </div>
+</div>
+
+<script>
+let aboutQuill;
+
+document.addEventListener('DOMContentLoaded', () => {
+  aboutQuill = new Quill('#aboutEditor', {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        ['bold', 'italic', 'underline'],
+        [{ 'header': [2, 3, false] }],
+        ['link'],
+        ['clean']
+      ]
+    }
+  });
+});
+
+document.getElementById('aboutForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const heading = e.target.heading.value;
+  const content = aboutQuill.root.innerHTML;
+  const res = await fetch('/backend/api/about', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ heading, content })
+  });
+  if (res.ok) showToast('Over Mij opgeslagen!');
+  else showToast('Opslaan mislukt', 'error');
+});
+
+async function uploadAboutImage(input) {
+  if (!input.files[0]) return;
+  const form = new FormData();
+  form.append('image', input.files[0]);
+  const res = await fetch('/backend/api/about/image', { method: 'POST', body: form });
+  if (res.ok) {
+    const data = await res.json();
+    document.getElementById('aboutImagePreview').src = data.image_path;
+    showToast('Afbeelding geüpload!');
+  } else {
+    showToast('Upload mislukt', 'error');
+  }
+}
+
+function addStat() {
+  const list = document.getElementById('statsList');
+  const div = document.createElement('div');
+  div.className = 'stat-row';
+  div.innerHTML = `
+    <input type="text" placeholder="Nummer (bijv. 20+)" class="form-control form-control-sm stat-number">
+    <input type="text" placeholder="Label (bijv. Jaar Ervaring)" class="form-control form-control-sm stat-label">
+    <button class="btn btn-danger btn-sm" onclick="removeStat(this)">X</button>
+  `;
+  list.appendChild(div);
+}
+
+function removeStat(btn) {
+  btn.parentElement.remove();
+}
+
+async function saveStats() {
+  const rows = document.querySelectorAll('.stat-row');
+  const stats = [];
+  rows.forEach(row => {
+    const number = row.querySelector('.stat-number').value;
+    const label = row.querySelector('.stat-label').value;
+    if (number && label) stats.push({ number, label });
+  });
+  const res = await fetch('/backend/api/about/stats', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stats })
+  });
+  if (res.ok) showToast('Statistieken opgeslagen!');
+  else showToast('Opslaan mislukt', 'error');
+}
+</script>
+
+<%- include('layout-footer') %>

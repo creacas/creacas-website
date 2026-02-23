@@ -1,0 +1,67 @@
+<% const active = 'settings' %>
+<%- include('layout-header') %>
+
+<div class="page-header">
+  <h1>Instellingen</h1>
+  <p>Algemene site-instellingen en meta informatie.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2>Site Instellingen</h2>
+  </div>
+  <div class="card-body">
+    <form id="settingsForm">
+      <div class="form-group">
+        <label>Site titel (browser tab)</label>
+        <input type="text" name="site_title" value="<%= settings.site_title || '' %>" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Meta beschrijving (SEO)</label>
+        <textarea name="meta_description" class="form-control" rows="3"><%= settings.meta_description || '' %></textarea>
+      </div>
+      <div class="form-group">
+        <label>Meta keywords (SEO)</label>
+        <input type="text" name="meta_keywords" value="<%= settings.meta_keywords || '' %>" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Footer tekst (HTML toegestaan)</label>
+        <input type="text" name="footer_text" value="<%- (settings.footer_text || '').replace(/"/g, '&quot;') %>" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Portfolio heading</label>
+        <input type="text" name="portfolio_heading" value="<%= settings.portfolio_heading || '' %>" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Portfolio subtitel</label>
+        <input type="text" name="portfolio_subtitle" value="<%= settings.portfolio_subtitle || '' %>" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Services heading</label>
+        <input type="text" name="services_heading" value="<%= settings.services_heading || '' %>" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Services subtitel</label>
+        <input type="text" name="services_subtitle" value="<%= settings.services_subtitle || '' %>" class="form-control">
+      </div>
+      <button type="submit" class="btn btn-primary">Opslaan</button>
+    </form>
+  </div>
+</div>
+
+<script>
+document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const data = Object.fromEntries(form);
+  const res = await fetch('/backend/api/settings', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (res.ok) showToast('Instellingen opgeslagen!');
+  else showToast('Opslaan mislukt', 'error');
+});
+</script>
+
+<%- include('layout-footer') %>

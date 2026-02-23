@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - CreaCas CMS</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="login-page">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <img src="/assets/logo-dark.svg" alt="CreaCas" class="login-logo">
+        <h1>CreaCas CMS</h1>
+        <p>Log in om de website te beheren</p>
+      </div>
+      <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+      <% } %>
+      <form method="POST" action="/backend/login" class="login-form">
+        <div class="form-group">
+          <label for="username">Gebruikersnaam</label>
+          <input type="text" id="username" name="username" required autofocus>
+        </div>
+        <div class="form-group">
+          <label for="password">Wachtwoord</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Inloggen</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

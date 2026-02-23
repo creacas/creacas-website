@@ -1,0 +1,134 @@
+<% const active = 'portfolio' %>
+<%- include('layout-header') %>
+
+<div class="page-header">
+  <div class="page-header-row">
+    <div>
+      <h1><%= project.title %></h1>
+      <p>Bewerk projectdetails en galerij-afbeeldingen.</p>
+    </div>
+    <a href="/backend/portfolio" class="btn btn-secondary">Terug naar Portfolio</a>
+  </div>
+</div>
+
+<!-- Project Details -->
+<div class="card">
+  <div class="card-header">
+    <h2>Project Details</h2>
+  </div>
+  <div class="card-body">
+    <form id="projectForm" enctype="multipart/form-data">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Titel</label>
+          <input type="text" name="title" value="<%= project.title %>" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Slug</label>
+          <input type="text" name="slug" value="<%= project.slug %>" class="form-control">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Categorie</label>
+          <select name="category_id" class="form-control">
+            <% categories.forEach(cat => { %>
+            <option value="<%= cat.id %>" <%= cat.id === project.category_id ? 'selected' : '' %>><%= cat.name %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Beschrijving</label>
+          <input type="text" name="description" value="<%= project.description %>" class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Cover afbeelding</label>
+        <div class="image-upload-area">
+          <img src="<%= project.cover_image %>" alt="Cover" class="preview-image" id="coverPreview">
+          <input type="file" name="cover_image" accept="image/*" class="form-control" onchange="previewImage(this, 'coverPreview')">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Project opslaan</button>
+    </form>
+  </div>
+</div>
+
+<!-- Gallery -->
+<div class="card">
+  <div class="card-header">
+    <h2>Galerij (<%= images.length %> afbeeldingen)</h2>
+    <button class="btn btn-primary btn-sm" onclick="document.getElementById('galleryUpload').click()">
+      + Afbeeldingen toevoegen
+    </button>
+    <input type="file" id="galleryUpload" accept="image/*" multiple style="display:none" onchange="uploadGalleryImages(this)">
+  </div>
+  <div class="card-body">
+    <div id="galleryList" class="sortable-grid">
+      <% images.forEach(img => { %>
+      <div class="gallery-card" data-id="<%= img.id %>">
+        <div class="drag-handle">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 6h2v2H8V6zm6 0h2v2h-2V6zM8 11h2v2H8v-2zm6 0h2v2h-2v-2zm-6 5h2v2H8v-2zm6 0h2v2h-2v-2z"/></svg>
+        </div>
+        <img src="<%= img.image_path %>" alt="<%= img.alt_text %>">
+        <div class="gallery-card-actions">
+          <input type="text" value="<%= img.alt_text %>" placeholder="Alt tekst" class="form-control form-control-sm" onchange="updateGalleryAlt(<%= img.id %>, this.value)">
+          <button class="btn btn-danger btn-sm" onclick="deleteGalleryImage(<%= img.id %>)">X</button>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<script>
+const projectId = <%= project.id %>;
+
+document.getElementById('projectForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const res = await fetch(`/backend/api/portfolio/projects/${projectId}`, { method: 'PUT', body: form });
+  if (res.ok) showToast('Project opgeslagen!');
+  else showToast('Opslaan mislukt', 'error');
+});
+
+function previewImage(input, previewId) {
+  if (input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = (e) => { document.getElementById(previewId).src = e.target.result; };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+async function uploadGalleryImages(input) {
+  for (const file of input.files) {
+    const form = new FormData();
+    form.append('image', file);
+    form.append('alt_text', file.name.replace(/\.[^.]+$/, ''));
+    await fetch(`/backend/api/portfolio/projects/${projectId}/gallery`, { method: 'POST', body: form });
+  }
+  showToast(`${input.files.length} afbeelding(en) geüpload!`);
+  input.value = '';
+  location.reload();
+}
+
+async function updateGalleryAlt(id, value) {
+  await fetch(`/backend/api/portfolio/gallery/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ alt_text: value })
+  });
+}
+
+async function deleteGalleryImage(id) {
+  if (!confirm('Verwijder deze afbeelding?')) return;
+  const res = await fetch(`/backend/api/portfolio/gallery/${id}`, { method: 'DELETE' });
+  if (res.ok) { showToast('Afbeelding verwijderd'); location.reload(); }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSortable('galleryList', '/backend/api/portfolio/gallery/reorder');
+});
+</script>
+
+<%- include('layout-footer') %>

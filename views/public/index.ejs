@@ -144,6 +144,9 @@
           </div>
           <h3><%= service.title %></h3>
           <p><%= service.description %></p>
+          <% if (service.button_text && service.button_link) { %>
+          <a href="<%= service.button_link %>" class="btn service-btn"><%= service.button_text %></a>
+          <% } %>
         </div>
         <% }) %>
       </div>

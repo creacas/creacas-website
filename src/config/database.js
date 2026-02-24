@@ -74,6 +74,8 @@ function initDatabase() {
       title TEXT NOT NULL,
       description TEXT NOT NULL DEFAULT '',
       icon_svg TEXT NOT NULL DEFAULT '',
+      button_text TEXT NOT NULL DEFAULT '',
+      button_link TEXT NOT NULL DEFAULT '',
       sort_order INTEGER NOT NULL DEFAULT 0
     );
 
@@ -113,6 +115,13 @@ function initDatabase() {
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `);
+
+  // Migrations for existing databases
+  const columns = db.prepare("PRAGMA table_info(services)").all().map(c => c.name);
+  if (!columns.includes('button_text')) {
+    db.exec("ALTER TABLE services ADD COLUMN button_text TEXT NOT NULL DEFAULT ''");
+    db.exec("ALTER TABLE services ADD COLUMN button_link TEXT NOT NULL DEFAULT ''");
+  }
 }
 
 module.exports = { getDb, initDatabase };

@@ -662,6 +662,21 @@ nav {
   font-size: 0.95rem;
 }
 
+.service-btn {
+  margin-top: 1.5rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.85rem;
+  color: var(--orange);
+  border-color: var(--orange);
+  background-color: transparent;
+}
+
+.service-btn:hover {
+  background-color: var(--orange);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
 /* ============================================
    About Section
    ============================================ */

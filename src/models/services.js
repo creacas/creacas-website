@@ -10,14 +10,14 @@ function getById(id) {
 
 function create(data) {
   const maxOrder = getDb().prepare('SELECT MAX(sort_order) as m FROM services').get().m || 0;
-  return getDb().prepare('INSERT INTO services (title, description, icon_svg, sort_order) VALUES (?, ?, ?, ?)').run(
-    data.title, data.description, data.icon_svg || '', maxOrder + 1
+  return getDb().prepare('INSERT INTO services (title, description, icon_svg, button_text, button_link, sort_order) VALUES (?, ?, ?, ?, ?, ?)').run(
+    data.title, data.description, data.icon_svg || '', data.button_text || '', data.button_link || '', maxOrder + 1
   );
 }
 
 function update(id, data) {
-  getDb().prepare('UPDATE services SET title = ?, description = ?, icon_svg = ? WHERE id = ?').run(
-    data.title, data.description, data.icon_svg || '', id
+  getDb().prepare('UPDATE services SET title = ?, description = ?, icon_svg = ?, button_text = ?, button_link = ? WHERE id = ?').run(
+    data.title, data.description, data.icon_svg || '', data.button_text || '', data.button_link || '', id
   );
 }
 

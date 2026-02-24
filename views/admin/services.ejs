@@ -25,6 +25,14 @@
         <label>Icon SVG (plak de volledige &lt;svg&gt; tag)</label>
         <textarea id="svcIcon" class="form-control" rows="3"></textarea>
       </div>
+      <div class="form-group">
+        <label>Knop tekst (optioneel)</label>
+        <input type="text" id="svcBtnText" class="form-control" placeholder="Bijv. Meer info">
+      </div>
+      <div class="form-group">
+        <label>Knop link (optioneel)</label>
+        <input type="text" id="svcBtnLink" class="form-control" placeholder="Bijv. /cloud-opslag of #contact">
+      </div>
       <div class="form-actions">
         <button class="btn btn-primary btn-sm" onclick="saveService()">Opslaan</button>
         <button class="btn btn-secondary btn-sm" onclick="hideServiceForm()">Annuleren</button>
@@ -59,6 +67,8 @@ function showServiceForm() {
   document.getElementById('svcTitle').value = '';
   document.getElementById('svcDesc').value = '';
   document.getElementById('svcIcon').value = '';
+  document.getElementById('svcBtnText').value = '';
+  document.getElementById('svcBtnLink').value = '';
   document.getElementById('serviceForm').style.display = 'block';
 }
 
@@ -74,6 +84,8 @@ function editService(id) {
   document.getElementById('svcTitle').value = svc.title;
   document.getElementById('svcDesc').value = svc.description;
   document.getElementById('svcIcon').value = svc.icon_svg;
+  document.getElementById('svcBtnText').value = svc.button_text || '';
+  document.getElementById('svcBtnLink').value = svc.button_link || '';
   document.getElementById('serviceForm').style.display = 'block';
 }
 
@@ -81,7 +93,9 @@ async function saveService() {
   const data = {
     title: document.getElementById('svcTitle').value,
     description: document.getElementById('svcDesc').value,
-    icon_svg: document.getElementById('svcIcon').value
+    icon_svg: document.getElementById('svcIcon').value,
+    button_text: document.getElementById('svcBtnText').value,
+    button_link: document.getElementById('svcBtnLink').value
   };
   const url = editingServiceId
     ? `/backend/api/services/${editingServiceId}`

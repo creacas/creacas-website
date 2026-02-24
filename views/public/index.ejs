@@ -35,6 +35,11 @@
         <li><a href="#portfolio">Portfolio</a></li>
         <li><a href="#services">Services</a></li>
         <li><a href="#about">Over Mij</a></li>
+        <% if (typeof navPages !== 'undefined' && navPages.length > 0) { %>
+        <% navPages.forEach(p => { %>
+        <li><a href="/<%= p.slug %>"><%= p.title %></a></li>
+        <% }) %>
+        <% } %>
         <li><a href="#contact">Contact</a></li>
       </ul>
 

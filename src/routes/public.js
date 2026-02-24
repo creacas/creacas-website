@@ -6,6 +6,7 @@ const portfolioModel = require('../models/portfolio');
 const servicesModel = require('../models/services');
 const aboutModel = require('../models/about');
 const contactModel = require('../models/contact');
+const pagesModel = require('../models/pages');
 
 router.get('/', (req, res) => {
   const settings = settingsModel.getAll();
@@ -71,6 +72,14 @@ router.post('/api/contact', express.json(), async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Verzenden mislukt.' });
   }
+});
+
+// Dynamic pages (catch-all — must be LAST)
+router.get('/:slug', (req, res, next) => {
+  const page = pagesModel.getBySlug(req.params.slug);
+  if (!page) return next();
+  const settings = settingsModel.getAll();
+  res.render('public/page', { page, settings });
 });
 
 module.exports = router;

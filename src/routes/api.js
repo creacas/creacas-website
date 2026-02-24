@@ -9,6 +9,7 @@ const portfolioModel = require('../models/portfolio');
 const servicesModel = require('../models/services');
 const aboutModel = require('../models/about');
 const contactModel = require('../models/contact');
+const pagesModel = require('../models/pages');
 
 router.use(requireAuth);
 
@@ -325,6 +326,80 @@ router.put('/social/:id', (req, res) => {
 router.delete('/social/:id', (req, res) => {
   try {
     contactModel.deleteSocialLink(parseInt(req.params.id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// === PAGES ===
+router.post('/pages', (req, res) => {
+  try {
+    const { title, slug } = req.body;
+    if (!title || !slug) return res.status(400).json({ error: 'Titel en slug zijn verplicht.' });
+    if (pagesModel.isReservedSlug(slug)) return res.status(400).json({ error: 'Deze slug is gereserveerd.' });
+    if (pagesModel.isSlugTaken(slug)) return res.status(400).json({ error: 'Deze slug is al in gebruik.' });
+    const result = pagesModel.create({ title, slug });
+    res.json({ success: true, id: result.lastInsertRowid });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reorder BEFORE :id
+router.put('/pages/reorder', (req, res) => {
+  try {
+    pagesModel.reorder(req.body.ids);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/pages/:id', (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const data = req.body;
+    if (data.slug !== undefined) {
+      if (pagesModel.isReservedSlug(data.slug)) return res.status(400).json({ error: 'Deze slug is gereserveerd.' });
+      if (pagesModel.isSlugTaken(data.slug, id)) return res.status(400).json({ error: 'Deze slug is al in gebruik.' });
+    }
+    pagesModel.update(id, data);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/pages/:id/image', setUploadType('page'), upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Geen afbeelding geüpload.' });
+    const page = pagesModel.getById(parseInt(req.params.id));
+    if (page && page.featured_image) deleteImage(page.featured_image);
+    const { processed } = await processImage(req.file.path, 'page');
+    pagesModel.update(parseInt(req.params.id), { featured_image: processed });
+    res.json({ success: true, image_path: processed });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/pages/:id/image', (req, res) => {
+  try {
+    const page = pagesModel.getById(parseInt(req.params.id));
+    if (page && page.featured_image) deleteImage(page.featured_image);
+    pagesModel.update(parseInt(req.params.id), { featured_image: '' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/pages/:id', (req, res) => {
+  try {
+    const page = pagesModel.getById(parseInt(req.params.id));
+    if (page && page.featured_image) deleteImage(page.featured_image);
+    pagesModel.remove(parseInt(req.params.id));
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

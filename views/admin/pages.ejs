@@ -1,0 +1,109 @@
+<% const active = 'pages' %>
+<%- include('layout-header') %>
+
+<div class="page-header">
+  <h1>Pagina's</h1>
+  <p>Beheer de pagina's op je website.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2>Pagina's</h2>
+    <button class="btn btn-primary btn-sm" onclick="showCreateForm()">+ Pagina toevoegen</button>
+  </div>
+  <div class="card-body">
+    <div id="createForm" style="display:none" class="inline-form">
+      <div class="form-group" style="flex:1;margin-bottom:0">
+        <label>Titel</label>
+        <input type="text" id="newTitle" class="form-control form-control-sm" placeholder="Paginatitel" oninput="generateSlug()">
+      </div>
+      <div class="form-group" style="flex:1;margin-bottom:0">
+        <label>Slug</label>
+        <input type="text" id="newSlug" class="form-control form-control-sm" placeholder="pagina-slug">
+      </div>
+      <div class="form-actions" style="margin-top:0">
+        <button class="btn btn-primary btn-sm" onclick="createPage()">Aanmaken</button>
+        <button class="btn btn-secondary btn-sm" onclick="hideCreateForm()">Annuleren</button>
+      </div>
+    </div>
+
+    <% if (pages.length === 0) { %>
+    <p style="color:var(--admin-text-muted);text-align:center;padding:2rem 0">Nog geen pagina's aangemaakt.</p>
+    <% } else { %>
+    <div id="pagesList" class="sortable-list">
+      <% pages.forEach(page => { %>
+      <div class="sortable-item" data-id="<%= page.id %>">
+        <div class="drag-handle">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 6h2v2H8V6zm6 0h2v2h-2V6zM8 11h2v2H8v-2zm6 0h2v2h-2v-2zm-6 5h2v2H8v-2zm6 0h2v2h-2v-2z"/></svg>
+        </div>
+        <div class="item-info">
+          <strong><%= page.title %></strong>
+          <span class="text-muted">/<%= page.slug %></span>
+        </div>
+        <% if (page.published) { %>
+        <span class="status-badge status-published">Gepubliceerd</span>
+        <% } else { %>
+        <span class="status-badge status-draft">Concept</span>
+        <% } %>
+        <a href="/backend/pages/<%= page.id %>" class="btn btn-secondary btn-sm">Bewerken</a>
+        <button class="btn btn-danger btn-sm" onclick="deletePage(<%= page.id %>, '<%= page.title.replace(/'/g, "\\'") %>')">Verwijderen</button>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+function showCreateForm() {
+  document.getElementById('newTitle').value = '';
+  document.getElementById('newSlug').value = '';
+  document.getElementById('createForm').style.display = 'flex';
+  document.getElementById('newTitle').focus();
+}
+
+function hideCreateForm() {
+  document.getElementById('createForm').style.display = 'none';
+}
+
+function generateSlug() {
+  const title = document.getElementById('newTitle').value;
+  const slug = title.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  document.getElementById('newSlug').value = slug;
+}
+
+async function createPage() {
+  const title = document.getElementById('newTitle').value.trim();
+  const slug = document.getElementById('newSlug').value.trim();
+  if (!title || !slug) return showToast('Titel en slug zijn verplicht', 'error');
+
+  const res = await fetch('/backend/api/pages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, slug })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    window.location.href = `/backend/pages/${data.id}`;
+  } else {
+    showToast(data.error || 'Aanmaken mislukt', 'error');
+  }
+}
+
+async function deletePage(id, title) {
+  if (!confirm(`Pagina "${title}" verwijderen?`)) return;
+  const res = await fetch(`/backend/api/pages/${id}`, { method: 'DELETE' });
+  if (res.ok) { showToast('Pagina verwijderd'); location.reload(); }
+  else showToast('Verwijderen mislukt', 'error');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSortable('pagesList', '/backend/api/pages/reorder');
+});
+</script>
+
+<%- include('layout-footer') %>

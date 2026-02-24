@@ -7,6 +7,7 @@ const portfolioModel = require('../models/portfolio');
 const servicesModel = require('../models/services');
 const aboutModel = require('../models/about');
 const contactModel = require('../models/contact');
+const pagesModel = require('../models/pages');
 
 // Login page
 router.get('/login', (req, res) => {
@@ -42,10 +43,12 @@ router.get('/', (req, res) => {
   const projects = portfolioModel.getProjects();
   const services = servicesModel.getAll();
   const slides = heroModel.getSlides();
+  const pages = pagesModel.getAll();
   res.render('admin/dashboard', {
     projectCount: projects.length,
     serviceCount: services.length,
-    slideCount: slides.length
+    slideCount: slides.length,
+    pageCount: pages.length
   });
 });
 
@@ -94,6 +97,17 @@ router.get('/contact', (req, res) => {
     settings,
     socialLinks: contactModel.getSocialLinks()
   });
+});
+
+// Pages
+router.get('/pages', (req, res) => {
+  res.render('admin/pages', { pages: pagesModel.getAll() });
+});
+
+router.get('/pages/:id', (req, res) => {
+  const page = pagesModel.getById(parseInt(req.params.id));
+  if (!page) return res.redirect('/backend/pages');
+  res.render('admin/page-edit', { page });
 });
 
 // Settings

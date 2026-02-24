@@ -10,7 +10,7 @@ RUN npm install --omit=dev && npm cache clean --force
 COPY . .
 
 # Create data and upload directories
-RUN mkdir -p data uploads/hero uploads/portfolio uploads/gallery uploads/about uploads/thumbnails
+RUN mkdir -p data uploads/hero uploads/portfolio uploads/gallery uploads/about uploads/page uploads/thumbnails
 
 EXPOSE 3000
 

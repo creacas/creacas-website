@@ -20,6 +20,7 @@ fs.mkdirSync(path.join(__dirname, 'uploads', 'portfolio'), { recursive: true });
 fs.mkdirSync(path.join(__dirname, 'uploads', 'gallery'), { recursive: true });
 fs.mkdirSync(path.join(__dirname, 'uploads', 'about'), { recursive: true });
 fs.mkdirSync(path.join(__dirname, 'uploads', 'thumbnails'), { recursive: true });
+fs.mkdirSync(path.join(__dirname, 'uploads', 'page'), { recursive: true });
 
 // Initialize database and seed
 initDatabase();
@@ -51,6 +52,13 @@ app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
 app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
 app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Make navPages available to all templates
+const pagesModel = require('./src/models/pages');
+app.use((req, res, next) => {
+  res.locals.navPages = pagesModel.getNavPages();
+  next();
+});
 
 // Routes
 const publicRoutes = require('./src/routes/public');

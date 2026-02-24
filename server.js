@@ -53,10 +53,12 @@ app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
 app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Make navPages available to all templates
+// Make navPages and asset version available to all templates
 const pagesModel = require('./src/models/pages');
+const assetVersion = Date.now();
 app.use((req, res, next) => {
   res.locals.navPages = pagesModel.getNavPages();
+  res.locals.v = assetVersion;
   next();
 });
 

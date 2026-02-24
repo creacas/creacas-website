@@ -662,29 +662,26 @@ nav {
   font-size: 0.95rem;
 }
 
-.service-btn {
+.service-card .service-btn {
   margin-top: 1.5rem;
   padding: 0.65rem 1.8rem;
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.03em;
   color: var(--orange);
+  background-color: transparent;
   border: 2px solid var(--orange);
   border-radius: 4px;
-  background-color: transparent;
   box-shadow: 0 2px 8px rgba(242, 100, 25, 0.08);
+  text-decoration: none;
 }
 
-.service-btn:hover {
+.service-card .service-btn:hover {
   background-color: var(--orange);
   color: #FFFFFF;
   border-color: var(--orange);
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(242, 100, 25, 0.3);
-}
-
-.service-card:hover .service-btn {
-  border-color: var(--orange);
 }
 
 /* ============================================

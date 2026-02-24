@@ -662,9 +662,13 @@ nav {
   font-size: 0.95rem;
 }
 
-.service-card .service-btn {
+.service-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-top: 1.5rem;
   padding: 0.65rem 1.8rem;
+  font-family: var(--font-body);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -674,12 +678,13 @@ nav {
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(242, 100, 25, 0.08);
   text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition);
 }
 
-.service-card .service-btn:hover {
+.service-btn:hover {
   background-color: var(--orange);
   color: #FFFFFF;
-  border-color: var(--orange);
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(242, 100, 25, 0.3);
 }

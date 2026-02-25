@@ -1,0 +1,11 @@
+<% const c = widget.config; %>
+<div class="widget widget-image widget-image-<%= c.layout || 'full-width' %>">
+  <% if (c.image_path) { %>
+    <figure>
+      <img src="<%= c.image_path %>" alt="<%= c.alt_text || '' %>" loading="lazy">
+      <% if (c.caption) { %>
+        <figcaption><%= c.caption %></figcaption>
+      <% } %>
+    </figure>
+  <% } %>
+</div>

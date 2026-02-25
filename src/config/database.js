@@ -114,6 +114,17 @@ function initDatabase() {
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS page_widgets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      page_id INTEGER NOT NULL,
+      type TEXT NOT NULL,
+      config TEXT NOT NULL DEFAULT '{}',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (page_id) REFERENCES pages(id) ON DELETE CASCADE
+    );
   `);
 
   // Migrations for existing databases
@@ -121,6 +132,20 @@ function initDatabase() {
   if (!columns.includes('button_text')) {
     db.exec("ALTER TABLE services ADD COLUMN button_text TEXT NOT NULL DEFAULT ''");
     db.exec("ALTER TABLE services ADD COLUMN button_link TEXT NOT NULL DEFAULT ''");
+  }
+
+  // Migrate existing page content to text widgets
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='page_widgets'").get();
+  if (tables) {
+    const pagesWithContent = db.prepare("SELECT id, content FROM pages WHERE content != '' AND content IS NOT NULL").all();
+    for (const page of pagesWithContent) {
+      const hasWidgets = db.prepare("SELECT COUNT(*) as count FROM page_widgets WHERE page_id = ?").get(page.id).count;
+      if (hasWidgets === 0) {
+        db.prepare(
+          "INSERT INTO page_widgets (page_id, type, config, sort_order) VALUES (?, 'text', ?, 0)"
+        ).run(page.id, JSON.stringify({ html: page.content }));
+      }
+    }
   }
 }
 

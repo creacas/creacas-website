@@ -10,6 +10,7 @@ const servicesModel = require('../models/services');
 const aboutModel = require('../models/about');
 const contactModel = require('../models/contact');
 const pagesModel = require('../models/pages');
+const widgetsModel = require('../models/widgets');
 
 router.use(requireAuth);
 
@@ -397,10 +398,113 @@ router.delete('/pages/:id/image', (req, res) => {
 
 router.delete('/pages/:id', (req, res) => {
   try {
-    const page = pagesModel.getById(parseInt(req.params.id));
+    const id = parseInt(req.params.id);
+    const page = pagesModel.getById(id);
     if (page && page.featured_image) deleteImage(page.featured_image);
-    pagesModel.remove(parseInt(req.params.id));
+    // Clean up widget images
+    const widgets = widgetsModel.getByPageId(id);
+    for (const w of widgets) {
+      deleteWidgetImages(w);
+    }
+    pagesModel.remove(id);
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// === WIDGETS ===
+
+function deleteWidgetImages(widget) {
+  const c = widget.config || {};
+  if (c.image_path) deleteImage(c.image_path);
+  if (c.left_image) deleteImage(c.left_image);
+  if (c.right_image) deleteImage(c.right_image);
+  if (Array.isArray(c.images)) {
+    for (const img of c.images) {
+      if (img.image_path) deleteImage(img.image_path);
+    }
+  }
+  if (Array.isArray(c.cards)) {
+    for (const card of c.cards) {
+      if (card.image_path) deleteImage(card.image_path);
+    }
+  }
+}
+
+router.get('/pages/:id/widgets', (req, res) => {
+  try {
+    const widgets = widgetsModel.getByPageId(parseInt(req.params.id));
+    res.json(widgets);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/pages/:id/widgets', (req, res) => {
+  try {
+    const { type, config } = req.body;
+    if (!type) return res.status(400).json({ error: 'Type is verplicht.' });
+    const result = widgetsModel.create(parseInt(req.params.id), type, config || {});
+    res.json({ success: true, id: result.lastInsertRowid });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/pages/:id/widgets/reorder', (req, res) => {
+  try {
+    widgetsModel.reorder(req.body.ids);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/pages/:id/widgets/bulk', (req, res) => {
+  try {
+    widgetsModel.bulkSave(parseInt(req.params.id), req.body.widgets);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/widgets/:id', (req, res) => {
+  try {
+    widgetsModel.update(parseInt(req.params.id), req.body.config);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/widgets/:id/duplicate', (req, res) => {
+  try {
+    const result = widgetsModel.duplicate(parseInt(req.params.id));
+    if (!result) return res.status(404).json({ error: 'Widget niet gevonden.' });
+    res.json({ success: true, id: result.lastInsertRowid });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/widgets/:id', (req, res) => {
+  try {
+    const widget = widgetsModel.getById(parseInt(req.params.id));
+    if (widget) deleteWidgetImages(widget);
+    widgetsModel.remove(parseInt(req.params.id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/widgets/upload-image', setUploadType('widget'), upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Geen afbeelding geüpload.' });
+    const { processed, thumbnail } = await processImage(req.file.path, 'widget');
+    res.json({ success: true, image_path: processed, thumbnail_path: thumbnail });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

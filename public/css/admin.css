@@ -726,6 +726,288 @@ textarea.form-control {
 }
 
 /* ============================================
+   Widget Editor
+   ============================================ */
+.widget-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.widget-block {
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-card);
+  transition: box-shadow 0.2s;
+}
+
+.widget-block.widget-ghost {
+  opacity: 0.4;
+}
+
+.widget-block.widget-chosen {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--admin-bg);
+  border-bottom: 1px solid var(--admin-border);
+  border-radius: 6px 6px 0 0;
+}
+
+.widget-drag-handle {
+  cursor: grab;
+  color: var(--admin-text-muted);
+  flex-shrink: 0;
+  display: flex;
+}
+
+.widget-drag-handle:active {
+  cursor: grabbing;
+}
+
+.widget-type-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  flex: 1;
+}
+
+.widget-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.widget-action-btn {
+  background: none;
+  border: 1px solid var(--admin-border);
+  border-radius: 4px;
+  padding: 0.3rem;
+  cursor: pointer;
+  color: var(--admin-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.widget-action-btn:hover {
+  color: var(--admin-text);
+  border-color: var(--admin-text-muted);
+}
+
+.widget-action-danger:hover {
+  color: var(--admin-danger);
+  border-color: var(--admin-danger);
+}
+
+.widget-body {
+  padding: 1rem;
+}
+
+.widget-body .form-group {
+  margin-bottom: 1rem;
+}
+
+.widget-body .form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Widget Picker */
+.widget-add-section {
+  text-align: center;
+}
+
+.widget-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--admin-bg);
+  border-radius: 6px;
+}
+
+.widget-type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
+  background: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--admin-font);
+  font-size: 0.8rem;
+  color: var(--admin-text);
+}
+
+.widget-type-btn:hover {
+  border-color: var(--admin-primary);
+  color: var(--admin-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.widget-type-btn svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Widget Image Upload */
+.widget-image-upload {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.widget-image-preview {
+  width: 200px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--admin-border);
+}
+
+.widget-image-preview-sm {
+  width: 100px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--admin-border);
+}
+
+.widget-image-placeholder {
+  width: 200px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--admin-bg);
+  border: 2px dashed var(--admin-border);
+  border-radius: 4px;
+  color: var(--admin-text-muted);
+  font-size: 0.85rem;
+}
+
+/* Widget Quill */
+.widget-quill-editor .ql-editor {
+  min-height: 120px;
+  font-family: var(--admin-font);
+  font-size: 0.9rem;
+}
+
+.widget-quill-editor-sm .ql-editor {
+  min-height: 80px;
+  font-family: var(--admin-font);
+  font-size: 0.9rem;
+}
+
+/* Widget Gallery Grid */
+.widget-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+
+.widget-gallery-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+}
+
+.widget-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.widget-gallery-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  background: var(--admin-danger);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Widget Video Preview */
+.widget-video-preview {
+  margin: 0.75rem 0;
+  border-radius: 6px;
+  overflow: hidden;
+  aspect-ratio: 16/9;
+  max-width: 500px;
+}
+
+.widget-video-preview iframe {
+  width: 100%;
+  height: 100%;
+}
+
+/* Widget Columns Editor */
+.widget-columns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.widget-column-panel {
+  padding: 0.75rem;
+  background: var(--admin-bg);
+  border-radius: 6px;
+}
+
+.widget-column-panel > label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--admin-text-muted);
+}
+
+/* Widget Card Editor */
+.widget-card-editor {
+  padding: 1rem;
+  background: var(--admin-bg);
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.widget-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+/* Widget Accordion Item Editor */
+.widget-accordion-item-editor {
+  padding: 1rem;
+  background: var(--admin-bg);
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+/* ============================================
    Responsive
    ============================================ */
 @media (max-width: 768px) {

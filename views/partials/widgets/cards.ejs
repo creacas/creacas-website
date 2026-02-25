@@ -1,0 +1,20 @@
+<% const c = widget.config; const cards = c.cards || []; %>
+<div class="widget widget-cards">
+  <div class="widget-cards-grid">
+    <% cards.forEach(card => { %>
+      <div class="widget-card">
+        <% if (card.icon_svg) { %>
+          <div class="widget-card-icon"><%- card.icon_svg %></div>
+        <% } %>
+        <% if (card.image_path) { %>
+          <img src="<%= card.image_path %>" alt="<%= card.title || '' %>" class="widget-card-image" loading="lazy">
+        <% } %>
+        <% if (card.title) { %><h3><%= card.title %></h3><% } %>
+        <% if (card.text) { %><p><%= card.text %></p><% } %>
+        <% if (card.button_text && card.button_link) { %>
+          <a href="<%= card.button_link %>" class="widget-card-btn"><%= card.button_text %></a>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+</div>

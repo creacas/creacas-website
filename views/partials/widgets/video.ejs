@@ -1,0 +1,15 @@
+<% const c = widget.config; %>
+<div class="widget widget-video">
+  <% if (c.embed_id && c.provider) { %>
+    <div class="widget-video-container">
+      <% if (c.provider === 'youtube') { %>
+        <iframe src="https://www.youtube-nocookie.com/embed/<%= c.embed_id %>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      <% } else if (c.provider === 'vimeo') { %>
+        <iframe src="https://player.vimeo.com/video/<%= c.embed_id %>" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      <% } %>
+    </div>
+    <% if (c.caption) { %>
+      <p class="widget-video-caption"><%= c.caption %></p>
+    <% } %>
+  <% } %>
+</div>

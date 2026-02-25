@@ -1,0 +1,19 @@
+<% const c = widget.config; const images = c.images || []; %>
+<div class="widget widget-gallery">
+  <div class="widget-gallery-grid" style="grid-template-columns:repeat(<%= c.columns || 3 %>, 1fr)">
+    <% images.forEach((img, idx) => { %>
+      <div class="widget-gallery-item<%= c.lightbox !== false ? ' lightbox-trigger' : '' %>" data-index="<%= idx %>">
+        <img src="<%= img.thumbnail_path || img.image_path %>" alt="<%= img.alt_text || '' %>" loading="lazy" data-full="<%= img.image_path %>">
+      </div>
+    <% }) %>
+  </div>
+  <% if (c.lightbox !== false && images.length > 0) { %>
+    <div class="widget-lightbox" data-gallery-id="gallery-<%= widget.id %>">
+      <button class="widget-lightbox-close">&times;</button>
+      <button class="widget-lightbox-prev">&lsaquo;</button>
+      <button class="widget-lightbox-next">&rsaquo;</button>
+      <img src="" alt="" class="widget-lightbox-img">
+      <span class="widget-lightbox-counter"></span>
+    </div>
+  <% } %>
+</div>

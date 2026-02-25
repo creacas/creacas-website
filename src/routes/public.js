@@ -7,6 +7,7 @@ const servicesModel = require('../models/services');
 const aboutModel = require('../models/about');
 const contactModel = require('../models/contact');
 const pagesModel = require('../models/pages');
+const widgetsModel = require('../models/widgets');
 
 router.get('/', (req, res) => {
   const settings = settingsModel.getAll();
@@ -79,7 +80,8 @@ router.get('/:slug', (req, res, next) => {
   const page = pagesModel.getBySlug(req.params.slug);
   if (!page) return next();
   const settings = settingsModel.getAll();
-  res.render('public/page', { page, settings });
+  const widgets = widgetsModel.getByPageId(page.id);
+  res.render('public/page', { page, settings, widgets });
 });
 
 module.exports = router;

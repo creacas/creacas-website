@@ -69,9 +69,20 @@
       <h1 class="page-title"><%= page.title %></h1>
       <div class="accent-line" style="margin: 1.5rem 0 2rem;"></div>
 
-      <div class="page-content">
-        <%- page.content %>
-      </div>
+      <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
+        <div class="page-widgets">
+          <% const validTypes = ['text','heading','spacer','image','gallery','video','columns','cards','cta','accordion','quote']; %>
+          <% widgets.forEach(widget => { %>
+            <% if (validTypes.includes(widget.type)) { %>
+              <%- include('../partials/widgets/' + widget.type, { widget }) %>
+            <% } %>
+          <% }) %>
+        </div>
+      <% } else if (page.content) { %>
+        <div class="page-content">
+          <%- page.content %>
+        </div>
+      <% } %>
     </div>
   </section>
 
@@ -84,5 +95,57 @@
 
   <!-- JavaScript -->
   <script src="/js/main.js"></script>
+  <script>
+    // Gallery lightbox
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.widget-gallery').forEach(gallery => {
+        const items = gallery.querySelectorAll('.lightbox-trigger');
+        const lightbox = gallery.querySelector('.widget-lightbox');
+        if (!lightbox || !items.length) return;
+
+        const lbImg = lightbox.querySelector('.widget-lightbox-img');
+        const lbCounter = lightbox.querySelector('.widget-lightbox-counter');
+        const images = [...items].map(el => el.querySelector('img').dataset.full);
+        let currentIdx = 0;
+
+        function show(idx) {
+          currentIdx = idx;
+          lbImg.src = images[idx];
+          lbCounter.textContent = `${idx + 1} / ${images.length}`;
+          lightbox.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }
+
+        function hide() {
+          lightbox.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+
+        items.forEach((item, idx) => {
+          item.addEventListener('click', () => show(idx));
+        });
+
+        lightbox.querySelector('.widget-lightbox-close').addEventListener('click', hide);
+        lightbox.querySelector('.widget-lightbox-prev').addEventListener('click', () => {
+          show((currentIdx - 1 + images.length) % images.length);
+        });
+        lightbox.querySelector('.widget-lightbox-next').addEventListener('click', () => {
+          show((currentIdx + 1) % images.length);
+        });
+        lightbox.addEventListener('click', (e) => {
+          if (e.target === lightbox) hide();
+        });
+      });
+
+      // Keyboard nav for lightbox
+      document.addEventListener('keydown', (e) => {
+        const activeLb = document.querySelector('.widget-lightbox.active');
+        if (!activeLb) return;
+        if (e.key === 'Escape') activeLb.querySelector('.widget-lightbox-close').click();
+        if (e.key === 'ArrowLeft') activeLb.querySelector('.widget-lightbox-prev').click();
+        if (e.key === 'ArrowRight') activeLb.querySelector('.widget-lightbox-next').click();
+      });
+    });
+  </script>
 </body>
 </html>

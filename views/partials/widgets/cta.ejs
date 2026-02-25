@@ -1,0 +1,10 @@
+<% const c = widget.config; %>
+<div class="widget widget-cta widget-cta-<%= c.style || 'dark' %>">
+  <div class="widget-cta-content">
+    <% if (c.heading) { %><h2><%= c.heading %></h2><% } %>
+    <% if (c.text) { %><p><%= c.text %></p><% } %>
+    <% if (c.button_text && c.button_link) { %>
+      <a href="<%= c.button_link %>" class="btn btn-primary"><%= c.button_text %></a>
+    <% } %>
+  </div>
+</div>

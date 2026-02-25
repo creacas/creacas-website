@@ -1,0 +1,19 @@
+<% const c = widget.config; const layout = c.layout || 'text-image'; %>
+<div class="widget widget-columns widget-columns-<%= layout %>">
+  <div class="widget-columns-row">
+    <% if (layout === 'text-image' || layout === 'text-text') { %>
+      <div class="widget-column page-content"><%- c.left_content || '' %></div>
+    <% } else { %>
+      <div class="widget-column widget-column-image">
+        <% if (c.left_image) { %><img src="<%= c.left_image %>" alt="" loading="lazy"><% } %>
+      </div>
+    <% } %>
+    <% if (layout === 'text-text' || layout === 'image-text') { %>
+      <div class="widget-column page-content"><%- c.right_content || '' %></div>
+    <% } else { %>
+      <div class="widget-column widget-column-image">
+        <% if (c.right_image) { %><img src="<%= c.right_image %>" alt="" loading="lazy"><% } %>
+      </div>
+    <% } %>
+  </div>
+</div>

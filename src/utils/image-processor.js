@@ -9,7 +9,8 @@ const SIZE_CONFIG = {
   portfolio: { width: 800, height: 600 },
   gallery: { width: 1400, height: null },
   about: { width: 600, height: null },
-  page: { width: 1200, height: null }
+  page: { width: 1200, height: null },
+  widget: { width: 1200, height: null }
 };
 
 const THUMBNAIL_SIZE = { width: 400, height: 300 };

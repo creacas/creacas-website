@@ -21,6 +21,7 @@ fs.mkdirSync(path.join(__dirname, 'uploads', 'gallery'), { recursive: true });
 fs.mkdirSync(path.join(__dirname, 'uploads', 'about'), { recursive: true });
 fs.mkdirSync(path.join(__dirname, 'uploads', 'thumbnails'), { recursive: true });
 fs.mkdirSync(path.join(__dirname, 'uploads', 'page'), { recursive: true });
+fs.mkdirSync(path.join(__dirname, 'uploads', 'widget'), { recursive: true });
 
 // Initialize database and seed
 initDatabase();

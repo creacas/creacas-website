@@ -8,6 +8,7 @@ const servicesModel = require('../models/services');
 const aboutModel = require('../models/about');
 const contactModel = require('../models/contact');
 const pagesModel = require('../models/pages');
+const widgetsModel = require('../models/widgets');
 
 // Login page
 router.get('/login', (req, res) => {
@@ -107,7 +108,8 @@ router.get('/pages', (req, res) => {
 router.get('/pages/:id', (req, res) => {
   const page = pagesModel.getById(parseInt(req.params.id));
   if (!page) return res.redirect('/backend/pages');
-  res.render('admin/page-edit', { page });
+  const widgets = widgetsModel.getByPageId(page.id);
+  res.render('admin/page-edit', { page, widgets });
 });
 
 // Settings

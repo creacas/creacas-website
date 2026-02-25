@@ -146,6 +146,7 @@ function renderWidgetEditor(widget) {
         <span class="ql-formats"><button class="ql-bold"></button><button class="ql-italic"></button></span>
         <span class="ql-formats"><select class="ql-header"><option value="2">H2</option><option value="3">H3</option><option selected value="">Normaal</option></select></span>
         <span class="ql-formats"><button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button><button class="ql-blockquote"></button></span>
+        <span class="ql-formats"><button class="ql-align" value=""></button><button class="ql-align" value="center"></button><button class="ql-align" value="right"></button><button class="ql-align" value="justify"></button></span>
         <span class="ql-formats"><button class="ql-link"></button></span>
         <span class="ql-formats"><button class="ql-clean"></button></span>
       </div>

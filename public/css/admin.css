@@ -854,6 +854,28 @@ textarea.form-control {
   height: 15px !important;
 }
 
+.widget-name-display {
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: var(--admin-text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.widget-name-field {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.widget-name-field input {
+  max-width: 300px;
+}
+
+.widget-expanded .widget-actions .widget-action-btn:first-child svg {
+  transform: rotate(180deg);
+}
+
 .widget-body {
   padding: 1rem;
 }

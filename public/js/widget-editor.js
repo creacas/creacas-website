@@ -112,12 +112,14 @@ function createWidgetBlock(widget) {
   block.className = 'widget-block';
   block.dataset.widgetId = widget.id;
 
+  const nameDisplay = widget.config._name ? ` <span class="widget-name-display">— ${escAttr(widget.config._name)}</span>` : '';
+
   block.innerHTML = `
     <div class="widget-header">
       <div class="widget-drag-handle">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8h16M4 16h16"/></svg>
       </div>
-      <span class="widget-type-label">${WIDGET_LABELS[widget.type] || widget.type}</span>
+      <span class="widget-type-label">${WIDGET_LABELS[widget.type] || widget.type}${nameDisplay}</span>
       <div class="widget-actions">
         <button class="widget-action-btn" onclick="toggleWidgetBody(${widget.id})" title="Inklappen/Uitklappen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -130,7 +132,10 @@ function createWidgetBlock(widget) {
         </button>
       </div>
     </div>
-    <div class="widget-body" id="widget-body-${widget.id}">
+    <div class="widget-body" id="widget-body-${widget.id}" style="display:none">
+      <div class="widget-name-field">
+        <input type="text" class="form-control form-control-sm" placeholder="Naam (optioneel, alleen voor admin)" value="${escAttr(widget.config._name || '')}" onchange="updateWidgetName(${widget.id}, this.value)">
+      </div>
       ${renderWidgetEditor(widget)}
     </div>
   `;
@@ -436,7 +441,28 @@ function toggleWidgetPicker() {
 
 function toggleWidgetBody(widgetId) {
   const body = document.getElementById(`widget-body-${widgetId}`);
-  body.style.display = body.style.display === 'none' ? 'block' : 'none';
+  const block = body.closest('.widget-block');
+  const isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? 'block' : 'none';
+  block.classList.toggle('widget-expanded', isHidden);
+}
+
+function updateWidgetName(widgetId, name) {
+  const w = widgetInstances.find(w => w.id === widgetId);
+  if (!w) return;
+  w.config._name = name;
+  // Update header display
+  const block = document.querySelector(`.widget-block[data-widget-id="${widgetId}"]`);
+  if (block) {
+    const label = block.querySelector('.widget-type-label');
+    const existing = label.querySelector('.widget-name-display');
+    if (name) {
+      if (existing) { existing.textContent = '— ' + name; }
+      else { label.insertAdjacentHTML('beforeend', ` <span class="widget-name-display">— ${escAttr(name)}</span>`); }
+    } else if (existing) {
+      existing.remove();
+    }
+  }
 }
 
 async function addWidget(type) {

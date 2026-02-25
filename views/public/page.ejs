@@ -66,8 +66,9 @@
       <img src="<%= page.featured_image %>" alt="<%= page.title %>" class="page-featured-image">
       <% } %>
 
-      <h1 class="page-title"><%= page.title %></h1>
-      <div class="accent-line" style="margin: 1.5rem 0 2rem;"></div>
+      <% const titleAlign = page.title_alignment || 'left'; %>
+      <h1 class="page-title" style="text-align: <%= titleAlign %>"><%= page.title %></h1>
+      <div class="accent-line" style="margin: 1.5rem <%= titleAlign === 'center' ? 'auto' : (titleAlign === 'right' ? '0 0 0 auto' : '0') %> 2rem;"></div>
 
       <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
         <div class="page-widgets">

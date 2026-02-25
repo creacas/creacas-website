@@ -50,6 +50,14 @@
           </label>
         </div>
       </div>
+      <div class="form-group">
+        <label>Titel uitlijning</label>
+        <select id="pageTitleAlignment" class="form-control" style="max-width:200px">
+          <option value="left" <%= (page.title_alignment || 'left') === 'left' ? 'selected' : '' %>>Links</option>
+          <option value="center" <%= page.title_alignment === 'center' ? 'selected' : '' %>>Gecentreerd</option>
+          <option value="right" <%= page.title_alignment === 'right' ? 'selected' : '' %>>Rechts</option>
+        </select>
+      </div>
       <button type="submit" class="btn btn-primary">Instellingen opslaan</button>
     </form>
   </div>
@@ -166,7 +174,8 @@ document.getElementById('settingsForm').addEventListener('submit', async (e) => 
     slug: document.getElementById('pageSlug').value,
     meta_description: document.getElementById('pageMeta').value,
     published: document.getElementById('pagePublished').checked,
-    show_in_nav: document.getElementById('pageShowInNav').checked
+    show_in_nav: document.getElementById('pageShowInNav').checked,
+    title_alignment: document.getElementById('pageTitleAlignment').value
   };
   const res = await fetch(`/backend/api/pages/${pageId}`, {
     method: 'PUT',

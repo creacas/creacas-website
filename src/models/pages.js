@@ -63,6 +63,7 @@ function update(id, data) {
   if (data.featured_image !== undefined) { fields.push('featured_image = ?'); values.push(data.featured_image); }
   if (data.published !== undefined) { fields.push('published = ?'); values.push(data.published ? 1 : 0); }
   if (data.show_in_nav !== undefined) { fields.push('show_in_nav = ?'); values.push(data.show_in_nav ? 1 : 0); }
+  if (data.title_alignment !== undefined) { fields.push('title_alignment = ?'); values.push(data.title_alignment); }
 
   if (fields.length === 0) return;
 

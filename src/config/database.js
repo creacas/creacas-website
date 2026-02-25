@@ -115,6 +115,20 @@ function initDatabase() {
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    -- Migration: add title_alignment to pages
+    CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY);
+  `);
+
+  // Add title_alignment column if not exists
+  const hasTitleAlign = db.prepare("SELECT name FROM _migrations WHERE name = 'pages_title_alignment'").get();
+  if (!hasTitleAlign) {
+    try {
+      db.exec("ALTER TABLE pages ADD COLUMN title_alignment TEXT NOT NULL DEFAULT 'left'");
+    } catch (e) { /* column may already exist */ }
+    db.prepare("INSERT OR IGNORE INTO _migrations (name) VALUES ('pages_title_alignment')").run();
+  }
+
+  db.exec(`
     CREATE TABLE IF NOT EXISTS page_widgets (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       page_id INTEGER NOT NULL,

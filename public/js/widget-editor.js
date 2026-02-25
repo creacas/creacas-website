@@ -41,18 +41,18 @@ function initWidgetEditor(pageId, widgets) {
   renderAllWidgets();
   // Wait for Sortable to be available (loaded in layout-footer)
   if (typeof Sortable !== 'undefined') {
-    initSortable();
+    initWidgetSortable();
   } else {
     var checkSortable = setInterval(function() {
       if (typeof Sortable !== 'undefined') {
         clearInterval(checkSortable);
-        initSortable();
+        initWidgetSortable();
       }
     }, 50);
   }
 }
 
-function initSortable() {
+function initWidgetSortable() {
   var list = document.getElementById('widgetList');
   if (!list) return;
   if (sortableInstance) sortableInstance.destroy();
@@ -418,7 +418,7 @@ async function addWidget(type) {
     if (data.success) {
       widgetInstances.push({ id: data.id, type, config });
       renderAllWidgets();
-      initSortable();
+      initWidgetSortable();
       document.getElementById('widgetPicker').style.display = 'none';
       showToast(`${WIDGET_LABELS[type]} widget toegevoegd`);
     }
@@ -438,7 +438,7 @@ async function duplicateWidget(widgetId) {
       const newWidget = { id: data.id, type: original.type, config: JSON.parse(JSON.stringify(original.config)) };
       widgetInstances.splice(idx + 1, 0, newWidget);
       renderAllWidgets();
-      initSortable();
+      initWidgetSortable();
       showToast('Widget gedupliceerd');
     }
   } catch (err) {
@@ -453,7 +453,7 @@ async function deleteWidget(widgetId) {
     if (res.ok) {
       widgetInstances = widgetInstances.filter(w => w.id !== widgetId);
       renderAllWidgets();
-      initSortable();
+      initWidgetSortable();
       showToast('Widget verwijderd');
     }
   } catch (err) {
@@ -555,7 +555,7 @@ async function uploadGalleryImages(widgetId) {
 
   collectQuillContent();
   renderAllWidgets();
-  initSortable();
+  initWidgetSortable();
   showToast('Afbeeldingen toegevoegd');
 }
 
@@ -565,7 +565,7 @@ function removeGalleryImage(widgetId, idx) {
     w.config.images.splice(idx, 1);
     collectQuillContent();
     renderAllWidgets();
-    initSortable();
+    initWidgetSortable();
   }
 }
 
@@ -584,7 +584,7 @@ async function uploadColumnImage(widgetId, side) {
       updateWidgetConfig(widgetId, key, data.image_path);
       collectQuillContent();
       renderAllWidgets();
-      initSortable();
+      initWidgetSortable();
       showToast('Afbeelding geupload');
     }
   } catch (err) {
@@ -606,7 +606,7 @@ async function uploadCardImage(widgetId, cardIdx) {
       updateCardField(widgetId, cardIdx, 'image_path', data.image_path);
       collectQuillContent();
       renderAllWidgets();
-      initSortable();
+      initWidgetSortable();
       showToast('Afbeelding geupload');
     }
   } catch (err) {
@@ -622,7 +622,7 @@ function addCard(widgetId) {
   w.config.cards.push({ icon_svg: '', image_path: '', title: '', text: '', button_text: '', button_link: '' });
   collectQuillContent();
   renderAllWidgets();
-  initSortable();
+  initWidgetSortable();
 }
 
 function removeCard(widgetId, idx) {
@@ -631,7 +631,7 @@ function removeCard(widgetId, idx) {
     w.config.cards.splice(idx, 1);
     collectQuillContent();
     renderAllWidgets();
-    initSortable();
+    initWidgetSortable();
   }
 }
 
@@ -642,7 +642,7 @@ function addAccordionItem(widgetId) {
   collectQuillContent();
   w.config.items.push({ title: '', content: '' });
   renderAllWidgets();
-  initSortable();
+  initWidgetSortable();
 }
 
 function removeAccordionItem(widgetId, idx) {
@@ -651,7 +651,7 @@ function removeAccordionItem(widgetId, idx) {
     collectQuillContent();
     w.config.items.splice(idx, 1);
     renderAllWidgets();
-    initSortable();
+    initWidgetSortable();
   }
 }
 
@@ -662,7 +662,7 @@ function changeColumnLayout(widgetId, newLayout) {
   collectQuillContent();
   w.config.layout = newLayout;
   renderAllWidgets();
-  initSortable();
+  initWidgetSortable();
 }
 
 // === Video URL parsing ===
@@ -690,7 +690,7 @@ function parseVideoUrl(widgetId, url) {
 
   collectQuillContent();
   renderAllWidgets();
-  initSortable();
+  initWidgetSortable();
 }
 
 function getEmbedUrl(provider, embedId) {

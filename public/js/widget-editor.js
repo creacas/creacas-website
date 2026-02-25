@@ -18,7 +18,8 @@ const WIDGET_LABELS = {
   cards: 'Cards',
   cta: 'Call to Action',
   accordion: 'Accordion',
-  quote: 'Quote'
+  quote: 'Quote',
+  'before-after': 'Before/After'
 };
 
 const DEFAULT_CONFIGS = {
@@ -32,7 +33,8 @@ const DEFAULT_CONFIGS = {
   cards: { cards: [{ icon_svg: '', image_path: '', title: '', text: '', button_text: '', button_link: '' }] },
   cta: { heading: '', text: '', button_text: '', button_link: '', style: 'dark' },
   accordion: { items: [{ title: '', content: '' }] },
-  quote: { text: '', author: '', source: '' }
+  quote: { text: '', author: '', source: '' },
+  'before-after': { before_image: '', after_image: '', before_label: 'Before', after_label: 'After', caption: '', start_position: 50 }
 };
 
 function initWidgetEditor(pageId, widgets) {
@@ -260,6 +262,38 @@ function renderWidgetEditor(widget) {
       <div class="form-row">
         <div class="form-group"><label>Auteur</label><input type="text" class="form-control" value="${escAttr(c.author || '')}" onchange="updateWidgetConfig(${widget.id}, 'author', this.value)"></div>
         <div class="form-group"><label>Bron</label><input type="text" class="form-control" value="${escAttr(c.source || '')}" onchange="updateWidgetConfig(${widget.id}, 'source', this.value)"></div>
+      </div>`;
+
+    case 'before-after':
+      return `<div class="form-row">
+        <div class="form-group">
+          <label>Before afbeelding</label>
+          <div class="widget-image-upload">
+            ${c.before_image ? `<img src="${c.before_image}" class="widget-image-preview" id="ba-before-preview-${widget.id}">` : `<div class="widget-image-placeholder" id="ba-before-preview-${widget.id}">Geen afbeelding</div>`}
+            <div>
+              <input type="file" accept="image/*" class="form-control" style="max-width:250px" id="ba-before-input-${widget.id}">
+              <button class="btn btn-primary btn-sm" style="margin-top:0.5rem" onclick="uploadBeforeAfterImage(${widget.id}, 'before')">Uploaden</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>After afbeelding</label>
+          <div class="widget-image-upload">
+            ${c.after_image ? `<img src="${c.after_image}" class="widget-image-preview" id="ba-after-preview-${widget.id}">` : `<div class="widget-image-placeholder" id="ba-after-preview-${widget.id}">Geen afbeelding</div>`}
+            <div>
+              <input type="file" accept="image/*" class="form-control" style="max-width:250px" id="ba-after-input-${widget.id}">
+              <button class="btn btn-primary btn-sm" style="margin-top:0.5rem" onclick="uploadBeforeAfterImage(${widget.id}, 'after')">Uploaden</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Before label</label><input type="text" class="form-control" value="${escAttr(c.before_label || 'Before')}" onchange="updateWidgetConfig(${widget.id}, 'before_label', this.value)"></div>
+        <div class="form-group"><label>After label</label><input type="text" class="form-control" value="${escAttr(c.after_label || 'After')}" onchange="updateWidgetConfig(${widget.id}, 'after_label', this.value)"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Startpositie slider (%)</label><input type="range" min="10" max="90" value="${c.start_position || 50}" class="form-control" style="padding:0.3rem 0" oninput="updateWidgetConfig(${widget.id}, 'start_position', parseInt(this.value)); this.nextElementSibling.textContent = this.value + '%'"><span style="font-size:0.85rem;color:var(--admin-text-muted)">${c.start_position || 50}%</span></div>
+        <div class="form-group"><label>Bijschrift</label><input type="text" class="form-control" value="${escAttr(c.caption || '')}" onchange="updateWidgetConfig(${widget.id}, 'caption', this.value)"></div>
       </div>`;
 
     default:
@@ -599,6 +633,35 @@ async function uploadCardImage(widgetId, cardIdx) {
       collectQuillContent();
       renderAllWidgets();
       initWidgetSortable();
+      showToast('Afbeelding geupload');
+    }
+  } catch (err) {
+    showToast('Upload mislukt', 'error');
+  }
+}
+
+// === Before/After image upload ===
+async function uploadBeforeAfterImage(widgetId, side) {
+  const input = document.getElementById(`ba-${side}-input-${widgetId}`);
+  if (!input || !input.files[0]) return showToast('Selecteer eerst een afbeelding', 'error');
+
+  const form = new FormData();
+  form.append('image', input.files[0]);
+
+  try {
+    const res = await fetch('/backend/api/widgets/upload-image', { method: 'POST', body: form });
+    const data = await res.json();
+    if (data.success) {
+      const key = side === 'before' ? 'before_image' : 'after_image';
+      updateWidgetConfig(widgetId, key, data.image_path);
+      const preview = document.getElementById(`ba-${side}-preview-${widgetId}`);
+      if (preview) {
+        if (preview.tagName === 'IMG') {
+          preview.src = data.image_path;
+        } else {
+          preview.outerHTML = `<img src="${data.image_path}" class="widget-image-preview" id="ba-${side}-preview-${widgetId}">`;
+        }
+      }
       showToast('Afbeelding geupload');
     }
   } catch (err) {

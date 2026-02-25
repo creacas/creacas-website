@@ -420,6 +420,8 @@ function deleteWidgetImages(widget) {
   if (c.image_path) deleteImage(c.image_path);
   if (c.left_image) deleteImage(c.left_image);
   if (c.right_image) deleteImage(c.right_image);
+  if (c.before_image) deleteImage(c.before_image);
+  if (c.after_image) deleteImage(c.after_image);
   if (Array.isArray(c.images)) {
     for (const img of c.images) {
       if (img.image_path) deleteImage(img.image_path);

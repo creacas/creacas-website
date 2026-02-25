@@ -71,7 +71,7 @@
 
       <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
         <div class="page-widgets">
-          <% const validTypes = ['text','heading','spacer','image','gallery','video','columns','cards','cta','accordion','quote']; %>
+          <% const validTypes = ['text','heading','spacer','image','gallery','video','columns','cards','cta','accordion','quote','before-after']; %>
           <% widgets.forEach(widget => { %>
             <% if (validTypes.includes(widget.type)) { %>
               <%- include('../partials/widgets/' + widget.type, { widget }) %>
@@ -144,6 +144,59 @@
         if (e.key === 'Escape') activeLb.querySelector('.widget-lightbox-close').click();
         if (e.key === 'ArrowLeft') activeLb.querySelector('.widget-lightbox-prev').click();
         if (e.key === 'ArrowRight') activeLb.querySelector('.widget-lightbox-next').click();
+      });
+
+      // Before/After sliders
+      document.querySelectorAll('.ba-container').forEach(container => {
+        const beforeWrapper = container.querySelector('.ba-before-wrapper');
+        const sliderLine = container.querySelector('.ba-slider-line');
+        const beforeImg = beforeWrapper.querySelector('.ba-image');
+        const startPos = parseInt(container.dataset.start) || 50;
+        let isDragging = false;
+
+        function setPosition(pct) {
+          pct = Math.max(0, Math.min(100, pct));
+          beforeWrapper.style.width = pct + '%';
+          sliderLine.style.left = pct + '%';
+          // Match the before image width to the container width
+          beforeImg.style.width = container.offsetWidth + 'px';
+        }
+
+        function getPercent(clientX) {
+          const rect = container.getBoundingClientRect();
+          return ((clientX - rect.left) / rect.width) * 100;
+        }
+
+        // Set initial position
+        setPosition(startPos);
+
+        // Recalculate on resize
+        window.addEventListener('resize', () => {
+          beforeImg.style.width = container.offsetWidth + 'px';
+        });
+
+        // Mouse events
+        container.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          isDragging = true;
+          setPosition(getPercent(e.clientX));
+        });
+        document.addEventListener('mousemove', (e) => {
+          if (!isDragging) return;
+          setPosition(getPercent(e.clientX));
+        });
+        document.addEventListener('mouseup', () => { isDragging = false; });
+
+        // Touch events
+        container.addEventListener('touchstart', (e) => {
+          isDragging = true;
+          setPosition(getPercent(e.touches[0].clientX));
+        }, { passive: true });
+        container.addEventListener('touchmove', (e) => {
+          if (!isDragging) return;
+          setPosition(getPercent(e.touches[0].clientX));
+        }, { passive: true });
+        container.addEventListener('touchend', () => { isDragging = false; });
       });
     });
   </script>

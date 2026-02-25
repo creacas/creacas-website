@@ -1,0 +1,29 @@
+<% const c = widget.config; %>
+<% if (c.before_image && c.after_image) { %>
+<div class="widget widget-before-after">
+  <div class="ba-container" data-start="<%= c.start_position || 50 %>">
+    <div class="ba-after-wrapper">
+      <img src="<%= c.after_image %>" alt="<%= c.after_label || 'After' %>" class="ba-image" draggable="false">
+    </div>
+    <div class="ba-before-wrapper">
+      <img src="<%= c.before_image %>" alt="<%= c.before_label || 'Before' %>" class="ba-image" draggable="false">
+    </div>
+    <div class="ba-slider-line">
+      <div class="ba-slider-handle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="24" height="24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7l-4 5 4 5M16 7l4 5-4 5"/>
+        </svg>
+      </div>
+    </div>
+    <% if (c.before_label) { %>
+    <span class="ba-label ba-label-before"><%= c.before_label %></span>
+    <% } %>
+    <% if (c.after_label) { %>
+    <span class="ba-label ba-label-after"><%= c.after_label %></span>
+    <% } %>
+  </div>
+  <% if (c.caption) { %>
+  <p class="ba-caption"><%= c.caption %></p>
+  <% } %>
+</div>
+<% } %>

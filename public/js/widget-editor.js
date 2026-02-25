@@ -39,17 +39,7 @@ function initWidgetEditor(pageId, widgets) {
   currentPageId = pageId;
   widgetInstances = widgets.map(w => ({ ...w }));
   renderAllWidgets();
-  // Wait for Sortable to be available (loaded in layout-footer)
-  if (typeof Sortable !== 'undefined') {
-    initWidgetSortable();
-  } else {
-    var checkSortable = setInterval(function() {
-      if (typeof Sortable !== 'undefined') {
-        clearInterval(checkSortable);
-        initWidgetSortable();
-      }
-    }, 50);
-  }
+  initWidgetSortable();
 }
 
 function initWidgetSortable() {

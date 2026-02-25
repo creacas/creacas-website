@@ -39,28 +39,40 @@ function initWidgetEditor(pageId, widgets) {
   currentPageId = pageId;
   widgetInstances = widgets.map(w => ({ ...w }));
   renderAllWidgets();
-  initSortable();
+  // Wait for Sortable to be available (loaded in layout-footer)
+  if (typeof Sortable !== 'undefined') {
+    initSortable();
+  } else {
+    var checkSortable = setInterval(function() {
+      if (typeof Sortable !== 'undefined') {
+        clearInterval(checkSortable);
+        initSortable();
+      }
+    }, 50);
+  }
 }
 
 function initSortable() {
-  const list = document.getElementById('widgetList');
+  var list = document.getElementById('widgetList');
+  if (!list) return;
   if (sortableInstance) sortableInstance.destroy();
-  sortableInstance = new Sortable(list, {
+  sortableInstance = Sortable.create(list, {
     handle: '.widget-header',
-    animation: 250,
+    draggable: '.widget-block',
+    animation: 200,
     ghostClass: 'widget-ghost',
     chosenClass: 'widget-chosen',
     dragClass: 'widget-dragging',
-    forceFallback: true,
-    fallbackTolerance: 3,
-    onEnd: function (evt) {
-      const items = [...document.querySelectorAll('.widget-block')];
-      const newOrder = items.map(el => parseInt(el.dataset.widgetId));
-      const reordered = [];
-      for (const id of newOrder) {
-        const w = widgetInstances.find(w => w.id === id);
+    fallbackOnBody: true,
+    swapThreshold: 0.65,
+    onEnd: function () {
+      var items = list.querySelectorAll('.widget-block');
+      var reordered = [];
+      items.forEach(function(el) {
+        var id = parseInt(el.dataset.widgetId);
+        var w = widgetInstances.find(function(w) { return w.id === id; });
         if (w) reordered.push(w);
-      }
+      });
       widgetInstances = reordered;
     }
   });
@@ -386,7 +398,7 @@ function updateAccordionField(widgetId, itemIdx, field, value) {
 // === Widget actions ===
 function toggleWidgetPicker() {
   const picker = document.getElementById('widgetPicker');
-  picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+  picker.classList.toggle('widget-picker-open');
 }
 
 function toggleWidgetBody(widgetId) {

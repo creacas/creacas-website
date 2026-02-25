@@ -1396,6 +1396,10 @@ footer a:hover {
   background-color: var(--light-gray);
 }
 
+.widget-text-content .ql-align-center { text-align: center; }
+.widget-text-content .ql-align-right { text-align: right; }
+.widget-text-content .ql-align-justify { text-align: justify; }
+
 /* Widget: Heading */
 .widget-heading h1,
 .widget-heading h2,

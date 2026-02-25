@@ -1,6 +1,6 @@
 <% const c = widget.config; %>
 <% if (c.before_image && c.after_image) { %>
-<div class="widget widget-before-after">
+<div class="widget widget-before-after<%= c.layout === 'half' ? ' widget-before-after-half' : '' %>">
   <div class="ba-container" data-start="<%= c.start_position || 50 %>">
     <div class="ba-after-wrapper">
       <img src="<%= c.after_image %>" alt="<%= c.after_label || 'After' %>" class="ba-image" draggable="false">

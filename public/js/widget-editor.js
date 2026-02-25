@@ -34,7 +34,7 @@ const DEFAULT_CONFIGS = {
   cta: { heading: '', text: '', button_text: '', button_link: '', style: 'dark' },
   accordion: { items: [{ title: '', content: '' }] },
   quote: { text: '', author: '', source: '' },
-  'before-after': { before_image: '', after_image: '', before_label: 'Before', after_label: 'After', caption: '', start_position: 50 }
+  'before-after': { before_image: '', after_image: '', before_label: 'Before', after_label: 'After', caption: '', start_position: 50, layout: 'full' }
 };
 
 function initWidgetEditor(pageId, widgets) {
@@ -266,7 +266,13 @@ function renderWidgetEditor(widget) {
       </div>`;
 
     case 'before-after':
-      return `<div class="form-row">
+      return `<div class="form-row" style="margin-bottom:1rem">
+        <div class="form-group"><label>Layout</label><select class="form-control" onchange="updateWidgetConfig(${widget.id}, 'layout', this.value)">
+          <option value="full" ${(c.layout || 'full') === 'full' ? 'selected' : ''}>Volledige breedte</option>
+          <option value="half" ${c.layout === 'half' ? 'selected' : ''}>Halve breedte (naast elkaar)</option>
+        </select></div>
+      </div>
+      <div class="form-row">
         <div class="form-group">
           <label>Before afbeelding</label>
           <div class="widget-image-upload">

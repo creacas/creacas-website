@@ -1332,7 +1332,12 @@ footer a:hover {
    ============================================ */
 .page-widgets {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+}
+
+.page-widgets > .widget {
+  width: 100%;
 }
 
 .widget {
@@ -1934,6 +1939,26 @@ footer a:hover {
   font-style: italic;
 }
 
+/* Before/After half variant */
+.widget-before-after-half {
+  width: calc(50% - 0.5rem) !important;
+}
+
+.widget-before-after-half .ba-slider-handle {
+  width: 36px;
+  height: 36px;
+}
+
+.widget-before-after-half .ba-slider-handle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.widget-before-after-half .ba-label {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
+}
+
 /* ============================================
    Widget Responsive
    ============================================ */
@@ -1967,4 +1992,8 @@ footer a:hover {
 
   .widget-lightbox-prev { left: 0.5rem; }
   .widget-lightbox-next { right: 0.5rem; }
+
+  .widget-before-after-half {
+    width: 100% !important;
+  }
 }

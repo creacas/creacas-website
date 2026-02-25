@@ -452,7 +452,7 @@ async function addWidget(type) {
       widgetInstances.push({ id: data.id, type, config });
       renderAllWidgets();
       initWidgetSortable();
-      document.getElementById('widgetPicker').style.display = 'none';
+      document.getElementById('widgetPicker').classList.remove('widget-picker-open');
       showToast(`${WIDGET_LABELS[type]} widget toegevoegd`);
     }
   } catch (err) {

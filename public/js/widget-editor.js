@@ -48,6 +48,8 @@ function initWidgetSortable() {
   if (sortableInstance) sortableInstance.destroy();
   sortableInstance = Sortable.create(list, {
     handle: '.widget-header',
+    filter: '.widget-action-btn',
+    preventOnFilter: false,
     draggable: '.widget-block',
     animation: 200,
     ghostClass: 'widget-ghost',

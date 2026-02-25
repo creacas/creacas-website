@@ -46,10 +46,13 @@ function initSortable() {
   const list = document.getElementById('widgetList');
   if (sortableInstance) sortableInstance.destroy();
   sortableInstance = new Sortable(list, {
-    handle: '.widget-drag-handle',
-    animation: 200,
+    handle: '.widget-header',
+    animation: 250,
     ghostClass: 'widget-ghost',
     chosenClass: 'widget-chosen',
+    dragClass: 'widget-dragging',
+    forceFallback: true,
+    fallbackTolerance: 3,
     onEnd: function (evt) {
       const items = [...document.querySelectorAll('.widget-block')];
       const newOrder = items.map(el => parseInt(el.dataset.widgetId));
@@ -383,7 +386,7 @@ function updateAccordionField(widgetId, itemIdx, field, value) {
 // === Widget actions ===
 function toggleWidgetPicker() {
   const picker = document.getElementById('widgetPicker');
-  picker.style.display = picker.style.display === 'none' ? 'grid' : 'none';
+  picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
 }
 
 function toggleWidgetBody(widgetId) {

@@ -777,10 +777,19 @@ textarea.form-control {
   border-bottom: 1px solid var(--admin-border);
   border-radius: 6px 6px 0 0;
   user-select: none;
+  cursor: grab;
+}
+
+.widget-header:active {
+  cursor: grabbing;
+}
+
+.widget-dragging {
+  opacity: 0.9;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .widget-drag-handle {
-  cursor: grab;
   color: #cbd5e1;
   flex-shrink: 0;
   display: flex;
@@ -790,10 +799,6 @@ textarea.form-control {
 
 .widget-block:hover .widget-drag-handle {
   color: var(--admin-text-muted);
-}
-
-.widget-drag-handle:active {
-  cursor: grabbing;
 }
 
 .widget-drag-handle svg {
